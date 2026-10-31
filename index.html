@@ -1,0 +1,2545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#58CC02" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Shelly's Vault" />
+  <title>Shelly's Vault — Personal Idea Organizer</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Nunito for friendly rounded typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Nunito', 'sans-serif'],
+          },
+          colors: {
+            vaultgreen: { DEFAULT: '#58CC02', dark: '#46A302', light: '#D7FFB8' },
+            vaultblue: { DEFAULT: '#1CB0F6', dark: '#1899D6', light: '#DDF4FF' },
+            vaultorange: { DEFAULT: '#FF9600', dark: '#CC7800', light: '#FFF0D6' },
+            vaultpurple: { DEFAULT: '#CE82FF', dark: '#A552E6', light: '#F5E6FF' },
+            vaultpink: { DEFAULT: '#FF4B4B', dark: '#EA2B2B', light: '#FFDFE0' },
+            vaultteal: { DEFAULT: '#14B8A6', dark: '#0D9488', light: '#CCFBF1' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      background-color: #F7F9FA;
+      color: #3C3C3C;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Tactile 3D buttons & cards */
+    .btn-3d {
+      transition: transform 0.08s ease, border-bottom-width 0.08s ease, background-color 0.15s ease;
+      position: relative;
+      user-select: none;
+    }
+    .btn-3d:active {
+      transform: translateY(3px);
+    }
+
+    .btn-green {
+      background-color: #58CC02;
+      border-bottom: 4px solid #46A302;
+      color: #FFFFFF;
+    }
+    .btn-green:hover { background-color: #61DC04; }
+    .btn-green:active { border-bottom-width: 1px; }
+
+    .btn-blue {
+      background-color: #1CB0F6;
+      border-bottom: 4px solid #1899D6;
+      color: #FFFFFF;
+    }
+    .btn-blue:hover { background-color: #29B8FC; }
+    .btn-blue:active { border-bottom-width: 1px; }
+
+    .btn-orange {
+      background-color: #FF9600;
+      border-bottom: 4px solid #CC7800;
+      color: #FFFFFF;
+    }
+    .btn-orange:hover { background-color: #FFA31A; }
+    .btn-orange:active { border-bottom-width: 1px; }
+
+    .btn-purple {
+      background-color: #A855F7;
+      border-bottom: 4px solid #7E22CE;
+      color: #FFFFFF;
+    }
+    .btn-purple:hover { background-color: #B366F9; }
+    .btn-purple:active { border-bottom-width: 1px; }
+
+    .btn-red {
+      background-color: #FF4B4B;
+      border-bottom: 4px solid #EA2B2B;
+      color: #FFFFFF;
+    }
+    .btn-red:hover { background-color: #FF5C5C; }
+    .btn-red:active { border-bottom-width: 1px; }
+
+    .btn-neutral {
+      background-color: #FFFFFF;
+      border: 2px solid #E5E5E5;
+      border-bottom: 4px solid #D4D4D4;
+      color: #4B4B4B;
+    }
+    .btn-neutral:hover { background-color: #F7F7F7; border-color: #D4D4D4; }
+    .btn-neutral:active { border-bottom-width: 2px; }
+
+    .card-3d {
+      background-color: #FFFFFF;
+      border: 2px solid #E5E7EB;
+      border-bottom: 5px solid #D1D5DB;
+      border-radius: 1.5rem;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .card-3d-interactive:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.06);
+    }
+    .card-3d-interactive:active {
+      transform: translateY(2px);
+      border-bottom-width: 3px;
+    }
+
+    /* Turtle animations */
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-5px) rotate(1.5deg); }
+    }
+    .turtle-float {
+      animation: floatSlow 3.5s ease-in-out infinite;
+    }
+    @keyframes popBounce {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.12) rotate(-3deg); }
+      80% { transform: scale(0.96) rotate(2deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+    .turtle-pop {
+      animation: popBounce 0.5s ease-out;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #F1F5F9; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    .safe-pb {
+      padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- ========================================================= -->
+  <!-- TOP NAVIGATION BAR (DESKTOP & MOBILE)                     -->
+  <!-- ========================================================= -->
+  <header class="bg-white sticky top-0 z-30 border-b-2 border-slate-200 px-4 py-3">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-3">
+      
+      <!-- Brand Logo & Title -->
+      <div onclick="navigateTo('home')" class="flex items-center space-x-3 cursor-pointer group">
+        <div class="w-11 h-11 rounded-2xl bg-[#D7FFB8] border-2 border-b-4 border-[#58CC02] flex items-center justify-center shadow-xs group-hover:scale-105 transition">
+          <span class="text-2xl">🐢</span>
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-black tracking-tight text-slate-800 leading-none">
+            Shelly's <span class="text-[#58CC02]">Vault</span>
+          </h1>
+          <p class="text-[11px] font-bold text-slate-400 mt-0.5">Personal Idea & Project Library</p>
+        </div>
+      </div>
+
+      <!-- Streamlined 2-Tab Desktop Navigation Pills -->
+      <nav class="hidden md:flex items-center space-x-2">
+        <button onclick="navigateTo('home')" id="desk-nav-home" class="px-4 py-2 rounded-2xl font-extrabold text-sm transition flex items-center space-x-2 bg-[#D7FFB8]/60 text-[#46A302] border-2 border-[#58CC02]">
+          <i class="fa-solid fa-house"></i><span>Home</span>
+        </button>
+        <button onclick="navigateTo('settings')" id="desk-nav-settings" class="px-4 py-2 rounded-2xl font-extrabold text-sm text-slate-500 hover:bg-slate-100 transition flex items-center space-x-2 border-2 border-transparent">
+          <i class="fa-solid fa-sliders"></i><span>Categories & Data</span>
+        </button>
+      </nav>
+
+      <!-- Right Action Buttons: Quick Backup & New Idea -->
+      <div class="flex items-center space-x-2">
+        <button onclick="exportFullBackupJSON()" title="Download Instant JSON Backup" class="btn-3d btn-neutral px-3 py-2 rounded-2xl text-xs sm:text-sm font-extrabold flex items-center space-x-1.5">
+          <i class="fa-solid fa-download text-[#1CB0F6]"></i>
+          <span class="hidden sm:inline">Save Backup</span>
+        </button>
+        <button onclick="openIdeaModal()" class="btn-3d btn-green px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-black flex items-center space-x-1.5 shadow-xs">
+          <i class="fa-solid fa-plus"></i>
+          <span>New Idea</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ========================================================= -->
+  <!-- MAIN CONTENT CONTAINER                                    -->
+  <!-- ========================================================= -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 pt-5 safe-pb">
+
+    <!-- ======================================================= -->
+    <!-- VIEW 1: HOME SCREEN                                     -->
+    <!-- ======================================================= -->
+    <section id="view-home" class="space-y-8">
+
+      <!-- Welcome Hero Card with Shelly the Cartoon Turtle & Quick Capture -->
+      <div class="card-3d bg-gradient-to-br from-[#EBF9FF] via-white to-[#F2FFE6] p-5 sm:p-6 border-2 border-[#BCE3FF]">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          
+          <!-- Left: Shelly the Cartoon Turtle SVG + Speech Bubble -->
+          <div class="flex items-start sm:items-center space-x-4">
+            <div onclick="triggerMascotPoke()" id="shellyAvatarContainer" class="cursor-pointer shrink-0 select-none turtle-float relative group" title="Poke Shelly for a tip or random idea!">
+              <!-- Custom Playful Cartoon SVG of Shelly the Idea Turtle -->
+              <svg width="92" height="92" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-sm">
+                <!-- Background Halo -->
+                <circle cx="60" cy="62" r="50" fill="#D7FFB8" stroke="#58CC02" stroke-width="4"/>
+                <!-- Glowing Lightbulb above Shelly's head -->
+                <g class="origin-center">
+                  <line x1="92" y1="12" x2="92" y2="6" stroke="#FFC800" stroke-width="3" stroke-linecap="round"/>
+                  <line x1="106" y1="18" x2="111" y2="14" stroke="#FFC800" stroke-width="3" stroke-linecap="round"/>
+                  <line x1="78" y1="18" x2="73" y2="14" stroke="#FFC800" stroke-width="3" stroke-linecap="round"/>
+                  <circle cx="92" cy="24" r="10" fill="#FFE066" stroke="#FF9600" stroke-width="2.5"/>
+                  <rect x="88" y="33" width="8" height="5" rx="2" fill="#94A3B8" stroke="#475569" stroke-width="2"/>
+                </g>
+                <!-- Turtle Shell (Behind neck/body) -->
+                <ellipse cx="46" cy="72" rx="26" ry="22" fill="#46A302" stroke="#2E6B01" stroke-width="3.5"/>
+                <path d="M28 65 Q46 52 64 65" stroke="#89E219" stroke-width="3" fill="none"/>
+                <path d="M24 76 Q46 86 68 76" stroke="#FFCC00" stroke-width="4" fill="none"/>
+                <!-- Turtle Body / Neck / Head -->
+                <path d="M52 84 C52 70, 56 54, 66 46 C76 38, 92 42, 92 56 C92 68, 80 74, 68 74 L64 90 Z" fill="#58CC02" stroke="#2E6B01" stroke-width="3.5" stroke-linejoin="round"/>
+                <!-- Cute Rosy Cheek -->
+                <ellipse cx="82" cy="61" rx="4.5" ry="2.8" fill="#FF8A8A" opacity="0.7"/>
+                <!-- Big Cartoon Eyes & Smart Glasses -->
+                <circle cx="71" cy="52" r="7" fill="white" stroke="#1E293B" stroke-width="2.5"/>
+                <circle cx="85" cy="52" r="7" fill="white" stroke="#1E293B" stroke-width="2.5"/>
+                <circle cx="72.5" cy="51.5" r="3.2" fill="#1E293B"/>
+                <circle cx="86.5" cy="51.5" r="3.2" fill="#1E293B"/>
+                <circle cx="73.8" cy="50" r="1.2" fill="white"/>
+                <circle cx="87.8" cy="50" r="1.2" fill="white"/>
+                <!-- Glasses Bridge & Frame -->
+                <line x1="78" y1="52" x2="78.5" y2="52" stroke="#1E293B" stroke-width="3"/>
+                <line x1="64" y1="51" x2="58" y2="49" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round"/>
+                <!-- Happy Smile -->
+                <path d="M74 63 Q80 68 85 62" stroke="#2E6B01" stroke-width="3" stroke-linecap="round" fill="none"/>
+                <!-- Cute Little Legs -->
+                <rect x="30" y="88" width="11" height="12" rx="5.5" fill="#58CC02" stroke="#2E6B01" stroke-width="3"/>
+                <rect x="52" y="88" width="11" height="12" rx="5.5" fill="#58CC02" stroke="#2E6B01" stroke-width="3"/>
+              </svg>
+              <span class="absolute -bottom-1 right-0 bg-[#FF9600] text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-xs border border-white">
+                Tap me!
+              </span>
+            </div>
+
+            <div class="space-y-1.5 flex-1">
+              <div class="inline-flex items-center space-x-2 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-2xs">
+                <span class="w-2 h-2 rounded-full bg-[#58CC02] animate-pulse"></span>
+                <span class="text-[11px] font-black uppercase tracking-wider text-slate-600">Shelly the Idea Turtle</span>
+              </div>
+              <p id="shellySpeechText" class="text-sm sm:text-base font-extrabold text-slate-800 leading-snug">
+                "Welcome to Shelly's Vault! Type a quick title on the right to save an idea in 2 seconds, or browse your categories below!"
+              </p>
+              <div class="pt-1 flex flex-wrap items-center gap-2">
+                <button onclick="openRandomIdeaSpotlight()" class="btn-3d btn-orange px-3.5 py-1.5 rounded-xl text-xs font-black flex items-center space-x-1.5">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  <span>Surprise Me! (Random Idea)</span>
+                </button>
+                <button onclick="triggerMascotPoke()" class="btn-3d btn-neutral px-3 py-1.5 rounded-xl text-xs font-extrabold text-slate-600">
+                  <i class="fa-regular fa-comment-dots mr-1 text-[#1CB0F6]"></i>New Tip
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Lightning-Fast 2-Second Quick Capture Bar -->
+          <div class="w-full lg:w-[420px] bg-white p-3.5 rounded-2xl border-2 border-slate-200 shadow-xs">
+            <label for="quickCaptureInput" class="block text-[11px] font-black uppercase tracking-wider text-slate-400 mb-1.5">
+              ⚡ Instant Idea Capture
+            </label>
+            <form onsubmit="handleQuickCaptureSubmit(event)" class="space-y-2">
+              <input
+                id="quickCaptureInput"
+                type="text"
+                placeholder="Type an idea title and hit Enter..."
+                required
+                class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-[#1CB0F6] focus:outline-none text-sm font-bold text-slate-800 placeholder:text-slate-400"
+              />
+              <div class="flex items-center justify-between gap-2">
+                <select id="quickCaptureCategory" class="flex-1 px-3 py-2 rounded-xl border-2 border-slate-200 text-xs font-extrabold text-slate-700 bg-slate-50 focus:border-[#1CB0F6] focus:outline-none">
+                  <!-- Populated dynamically with user categories -->
+                </select>
+                <button type="submit" class="btn-3d btn-green px-4 py-2 rounded-xl text-xs font-black shrink-0 flex items-center space-x-1.5">
+                  <i class="fa-solid fa-bolt"></i>
+                  <span>Quick Save</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Lightweight Dashboard Stats Pills (Click to filter Home list below) -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div onclick="filterHomeIdeasByStat('all')" class="card-3d card-3d-interactive p-3.5 flex items-center space-x-3 cursor-pointer">
+          <div class="w-11 h-11 rounded-2xl bg-[#DDF4FF] text-[#1CB0F6] flex items-center justify-center text-xl font-black shrink-0">
+            💡
+          </div>
+          <div>
+            <div id="statTotalIdeas" class="text-xl font-black text-slate-800 leading-none">0</div>
+            <div class="text-xs font-bold text-slate-400 mt-0.5">Total Ideas</div>
+          </div>
+        </div>
+
+        <div onclick="filterHomeIdeasByStat('In Progress')" class="card-3d card-3d-interactive p-3.5 flex items-center space-x-3 cursor-pointer">
+          <div class="w-11 h-11 rounded-2xl bg-[#FFF0D6] text-[#FF9600] flex items-center justify-center text-xl font-black shrink-0">
+            🚀
+          </div>
+          <div>
+            <div id="statInProgress" class="text-xl font-black text-slate-800 leading-none">0</div>
+            <div class="text-xs font-bold text-slate-400 mt-0.5">In Progress</div>
+          </div>
+        </div>
+
+        <div onclick="filterHomeIdeasByStat('favorites')" class="card-3d card-3d-interactive p-3.5 flex items-center space-x-3 cursor-pointer">
+          <div class="w-11 h-11 rounded-2xl bg-[#FFDFE0] text-[#FF4B4B] flex items-center justify-center text-xl font-black shrink-0">
+            ⭐
+          </div>
+          <div>
+            <div id="statFavorites" class="text-xl font-black text-slate-800 leading-none">0</div>
+            <div class="text-xs font-bold text-slate-400 mt-0.5">Favorites</div>
+          </div>
+        </div>
+
+        <div onclick="filterHomeIdeasByStat('Completed')" class="card-3d card-3d-interactive p-3.5 flex items-center space-x-3 cursor-pointer">
+          <div class="w-11 h-11 rounded-2xl bg-[#D7FFB8] text-[#46A302] flex items-center justify-center text-xl font-black shrink-0">
+            🏆
+          </div>
+          <div>
+            <div id="statCompleted" class="text-xl font-black text-slate-800 leading-none">0</div>
+            <div class="text-xs font-bold text-slate-400 mt-0.5">Completed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories Grid Section -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg sm:text-xl font-black text-slate-800">Categories</h2>
+            <p class="text-xs font-bold text-slate-400">Tap any category card to open it or click + to add an idea directly</p>
+          </div>
+          <button onclick="openCategoryModal()" class="btn-3d btn-neutral px-3.5 py-2 rounded-2xl text-xs font-extrabold flex items-center space-x-1.5">
+            <i class="fa-solid fa-folder-plus text-[#58CC02]"></i>
+            <span>+ New Category</span>
+          </button>
+        </div>
+
+        <div id="homeCategoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+
+      <!-- Pinned / Favorite Ideas Section (Auto-shows when Favorites exist) -->
+      <div id="homeFavoritesSection" class="hidden space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base sm:text-lg font-black text-slate-800 flex items-center gap-2">
+            <span class="text-amber-400">⭐</span> Pinned & Favorite Ideas
+          </h2>
+        </div>
+        <div id="homeFavoritesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+      <!-- All / Recent Ideas Section with Inline Search & Filters right on Home -->
+      <div id="homeAllIdeasSection" class="space-y-4 pt-2">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h2 class="text-lg sm:text-xl font-black text-slate-800 flex items-center gap-2">
+              <span>💡</span> All Ideas
+            </h2>
+            <p class="text-xs font-bold text-slate-400">Search, filter, and sort your ideas right from the home page</p>
+          </div>
+          <div class="flex items-center space-x-2 self-start sm:self-center">
+            <span id="homeResultCount" class="text-xs font-extrabold text-slate-400 mr-1">0 ideas</span>
+            <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+              <button onclick="setIdeaLayoutMode('grid')" id="homeViewBtnGrid" class="px-2.5 py-1 rounded-lg text-xs font-black bg-white shadow-2xs text-slate-800">
+                <i class="fa-solid fa-grip"></i>
+              </button>
+              <button onclick="setIdeaLayoutMode('list')" id="homeViewBtnList" class="px-2.5 py-1 rounded-lg text-xs font-black text-slate-400">
+                <i class="fa-solid fa-list"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Streamlined Search & Filter Bar on Home -->
+        <div class="bg-white p-3.5 rounded-2xl border-2 border-slate-200 flex flex-col md:flex-row items-stretch md:items-center gap-2.5">
+          <div class="relative flex-1">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input
+              id="homeSearchInput"
+              type="text"
+              oninput="renderHomeAllIdeas()"
+              placeholder="Search idea titles, descriptions, or notes..."
+              class="w-full pl-9 pr-4 py-2 rounded-xl border-2 border-slate-200 focus:border-[#1CB0F6] focus:outline-none text-xs sm:text-sm font-bold"
+            />
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="homeCategoryFilter" onchange="renderHomeAllIdeas()" class="px-3 py-2 rounded-xl border-2 border-slate-200 text-xs font-extrabold text-slate-700 bg-slate-50">
+              <option value="all">All Categories</option>
+            </select>
+            <select id="homeStatusFilter" onchange="renderHomeAllIdeas()" class="px-3 py-2 rounded-xl border-2 border-slate-200 text-xs font-extrabold text-slate-700 bg-slate-50">
+              <option value="all">All Statuses</option>
+              <option value="Idea">💡 Idea</option>
+              <option value="Planning">📐 Planning</option>
+              <option value="In Progress">🚀 In Progress</option>
+              <option value="Completed">🏆 Completed</option>
+            </select>
+            <select id="homeSortSelect" onchange="renderHomeAllIdeas()" class="px-3 py-2 rounded-xl border-2 border-slate-200 text-xs font-extrabold text-slate-700 bg-slate-50">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="priority">Priority (High → Low)</option>
+              <option value="alpha">Alphabetical (A → Z)</option>
+            </select>
+            <button onclick="toggleHomeFavoriteFilter()" id="homeFavChip" class="px-3 py-2 rounded-xl text-xs font-extrabold border-2 border-slate-200 text-slate-600 hover:bg-slate-100 transition">
+              ⭐ Favorites
+            </button>
+          </div>
+        </div>
+
+        <div id="homeRecentGrid">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================= -->
+    <!-- VIEW 2: DEDICATED CATEGORY PAGE                         -->
+    <!-- ======================================================= -->
+    <section id="view-category" class="hidden space-y-6">
+      <!-- Category Header Banner -->
+      <div id="categoryBanner" class="card-3d p-6 text-white relative overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+          <div class="flex items-center space-x-4">
+            <button onclick="navigateTo('home')" class="w-10 h-10 rounded-2xl bg-black/20 hover:bg-black/30 text-white flex items-center justify-center transition" title="Back to Home">
+              <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <div id="categoryBannerIcon" class="w-16 h-16 rounded-3xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-4xl shadow-inner">
+              🖨️
+            </div>
+            <div>
+              <span class="text-[11px] font-black uppercase tracking-wider bg-black/20 px-2.5 py-0.5 rounded-full">Category Collection</span>
+              <h2 id="categoryBannerTitle" class="text-2xl sm:text-3xl font-black mt-1">3D Printing</h2>
+              <p id="categoryBannerSubtitle" class="text-xs sm:text-sm font-bold text-white/90">0 ideas stored</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2 self-start sm:self-center">
+            <button id="btnEditCurrentCategory" class="btn-3d bg-white/20 hover:bg-white/30 border-b-4 border-black/20 px-3.5 py-2.5 rounded-2xl text-xs font-black text-white flex items-center space-x-1.5">
+              <i class="fa-solid fa-pen"></i>
+              <span>Customize</span>
+            </button>
+            <button id="btnAddIdeaInCategory" class="btn-3d bg-white text-slate-800 border-b-4 border-slate-300 hover:bg-slate-50 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-black flex items-center space-x-1.5">
+              <i class="fa-solid fa-plus text-[#58CC02]"></i>
+              <span>Add Idea Here</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter & View Switcher inside Category -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border-2 border-slate-200">
+        <div class="relative flex-1">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+          <input
+            id="catSearchInput"
+            type="text"
+            oninput="renderCategoryViewIdeas()"
+            placeholder="Search within this category..."
+            class="w-full pl-9 pr-4 py-2 rounded-xl border-2 border-slate-200 focus:border-[#1CB0F6] focus:outline-none text-xs sm:text-sm font-bold"
+          />
+        </div>
+        <div class="flex items-center space-x-2">
+          <select id="catStatusFilter" onchange="renderCategoryViewIdeas()" class="px-3 py-2 rounded-xl border-2 border-slate-200 text-xs font-extrabold text-slate-700 bg-slate-50">
+            <option value="all">All Statuses</option>
+            <option value="Idea">💡 Idea</option>
+            <option value="Planning">📐 Planning</option>
+            <option value="In Progress">🚀 In Progress</option>
+            <option value="Completed">🏆 Completed</option>
+          </select>
+          <select id="catSortSelect" onchange="renderCategoryViewIdeas()" class="px-3 py-2 rounded-xl border-2 border-slate-200 text-xs font-extrabold text-slate-700 bg-slate-50">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="priority">Priority (High → Low)</option>
+            <option value="alpha">Alphabetical (A → Z)</option>
+          </select>
+          <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <button onclick="setIdeaLayoutMode('grid')" id="catViewBtnGrid" class="px-2.5 py-1 rounded-lg text-xs font-black bg-white shadow-2xs text-slate-800">
+              <i class="fa-solid fa-grip"></i>
+            </button>
+            <button onclick="setIdeaLayoutMode('list')" id="catViewBtnList" class="px-2.5 py-1 rounded-lg text-xs font-black text-slate-400">
+              <i class="fa-solid fa-list"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ideas Container inside Category -->
+      <div id="categoryIdeasContainer">
+        <!-- Populated via JS -->
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <!-- VIEW 3: SETTINGS, CATEGORIES & DATA BACKUP              -->
+    <!-- ======================================================= -->
+    <section id="view-settings" class="hidden space-y-6">
+
+      <!-- Backup, Restore & Google Sheets CSV Export/Import Section -->
+      <div class="card-3d p-6 bg-white space-y-5">
+        <div class="flex items-start justify-between gap-4 border-b-2 border-slate-100 pb-4">
+          <div>
+            <span class="text-[11px] font-black uppercase tracking-wider text-[#1CB0F6] bg-[#DDF4FF] px-2.5 py-0.5 rounded-full">100% Local & Private</span>
+            <h2 class="text-xl font-black text-slate-800 mt-1">Backup, Restore & Google Sheets Sync</h2>
+            <p class="text-xs font-bold text-slate-500 mt-0.5">
+              All your ideas live locally in your browser. Save a JSON backup or export/import directly with Google Sheets.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Card 1: Save JSON Backup -->
+          <div class="p-4 rounded-2xl bg-[#F2FFE6] border-2 border-[#58CC02]/40 flex flex-col justify-between space-y-3">
+            <div>
+              <div class="w-10 h-10 rounded-xl bg-[#58CC02] text-white flex items-center justify-center text-lg mb-2">
+                <i class="fa-solid fa-file-shield"></i>
+              </div>
+              <h3 class="text-sm font-black text-slate-800">1. Save Full Backup (.JSON)</h3>
+              <p class="text-xs font-bold text-slate-600 mt-1">
+                Downloads every category, idea, note, and setting with today's timestamp.
+              </p>
+            </div>
+            <button onclick="exportFullBackupJSON()" class="btn-3d btn-green w-full py-2.5 rounded-xl text-xs font-black flex items-center justify-center space-x-1.5">
+              <i class="fa-solid fa-download"></i>
+              <span>Download JSON</span>
+            </button>
+          </div>
+
+          <!-- Card 2: Restore / Merge JSON Backup -->
+          <div class="p-4 rounded-2xl bg-[#EBF9FF] border-2 border-[#1CB0F6]/40 flex flex-col justify-between space-y-3">
+            <div>
+              <div class="w-10 h-10 rounded-xl bg-[#1CB0F6] text-white flex items-center justify-center text-lg mb-2">
+                <i class="fa-solid fa-file-import"></i>
+              </div>
+              <h3 class="text-sm font-black text-slate-800">2. Restore JSON Backup</h3>
+              <p class="text-xs font-bold text-slate-600 mt-1">
+                Import a saved `.json` backup file. Choose to safely merge or replace data.
+              </p>
+            </div>
+            <div>
+              <input type="file" id="jsonRestoreInput" accept=".json,application/json" onchange="handleBackupFileSelected(event)" class="hidden" />
+              <button onclick="document.getElementById('jsonRestoreInput').click()" class="btn-3d btn-blue w-full py-2.5 rounded-xl text-xs font-black flex items-center justify-center space-x-1.5">
+                <i class="fa-solid fa-upload"></i>
+                <span>Import JSON</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 3: Google Sheets CSV Export -->
+          <div class="p-4 rounded-2xl bg-[#FFF0D6] border-2 border-[#FF9600]/40 flex flex-col justify-between space-y-3">
+            <div>
+              <div class="w-10 h-10 rounded-xl bg-[#FF9600] text-white flex items-center justify-center text-lg mb-2">
+                <i class="fa-solid fa-file-csv"></i>
+              </div>
+              <h3 class="text-sm font-black text-slate-800">3. Export to Sheets (.CSV)</h3>
+              <p class="text-xs font-bold text-slate-600 mt-1">
+                Formatted columns for Category, Title, Description, Status, Priority, Notes & Links.
+              </p>
+            </div>
+            <button onclick="exportToGoogleSheetsCSV()" class="btn-3d btn-orange w-full py-2.5 rounded-xl text-xs font-black flex items-center justify-center space-x-1.5">
+              <i class="fa-solid fa-table"></i>
+              <span>Export CSV</span>
+            </button>
+          </div>
+
+          <!-- Card 4: Google Sheets CSV Import -->
+          <div class="p-4 rounded-2xl bg-[#F5E6FF] border-2 border-[#A855F7]/40 flex flex-col justify-between space-y-3">
+            <div>
+              <div class="w-10 h-10 rounded-xl bg-[#A855F7] text-white flex items-center justify-center text-lg mb-2">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+              </div>
+              <h3 class="text-sm font-black text-slate-800">4. Import from Google Sheets</h3>
+              <p class="text-xs font-bold text-slate-600 mt-1">
+                Upload a `.csv` file from Google Sheets or paste a published Sheet CSV link.
+              </p>
+            </div>
+            <button onclick="openSheetsImportModal()" class="btn-3d btn-purple w-full py-2.5 rounded-xl text-xs font-black flex items-center justify-center space-x-1.5">
+              <i class="fa-solid fa-file-arrow-up"></i>
+              <span>Import from Sheets</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manage & Reorder Categories Section -->
+      <div class="card-3d p-6 bg-white space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-slate-100 pb-4">
+          <div>
+            <h2 class="text-xl font-black text-slate-800">Customize & Reorder Categories</h2>
+            <p class="text-xs font-bold text-slate-400">Create new categories, pick icons & colors, or change their display order</p>
+          </div>
+          <button onclick="openCategoryModal()" class="btn-3d btn-green px-4 py-2.5 rounded-2xl text-xs font-black self-start sm:self-center">
+            <i class="fa-solid fa-plus mr-1"></i>Add Category
+          </button>
+        </div>
+
+        <div id="settingsCategoryList" class="space-y-2.5">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- App Preferences & Maintenance Controls -->
+      <div class="card-3d p-6 bg-white space-y-4">
+        <h2 class="text-lg font-black text-slate-800 border-b-2 border-slate-100 pb-3">App Preferences & Maintenance</h2>
+        
+        <div class="flex items-center justify-between py-2">
+          <div>
+            <div class="text-sm font-black text-slate-800">Interface Sound Effects</div>
+            <div class="text-xs font-bold text-slate-400">Play gentle audio chimes when saving ideas or marking favorites</div>
+          </div>
+          <button onclick="toggleSoundSetting()" id="btnSoundToggle" class="btn-3d btn-green px-4 py-2 rounded-xl text-xs font-black">
+            🔊 Sounds ON
+          </button>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+          <div>
+            <div class="text-sm font-black text-slate-800">Reset Vault Data</div>
+            <div class="text-xs font-bold text-slate-400">Clear all stored ideas and reset categories back to the initial 5 defaults</div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="confirmResetVault()" class="btn-3d btn-red px-4 py-2 rounded-xl text-xs font-black">
+              Reset Entire Vault
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- MOBILE BOTTOM NAVIGATION BAR (2 STREAMLINED TABS)         -->
+  <!-- ========================================================= -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-slate-200 px-4 py-2 grid grid-cols-2 gap-2 z-30">
+    <button onclick="navigateTo('home')" id="mob-nav-home" class="flex flex-col items-center justify-center py-1 rounded-xl text-[#58CC02] font-black">
+      <i class="fa-solid fa-house text-lg"></i>
+      <span class="text-[11px] mt-0.5">Home</span>
+    </button>
+    <button onclick="navigateTo('settings')" id="mob-nav-settings" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 font-bold">
+      <i class="fa-solid fa-sliders text-lg"></i>
+      <span class="text-[11px] mt-0.5">Categories & Data</span>
+    </button>
+  </nav>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 1: ADD / EDIT IDEA MODAL (NO TAGS, NO ARCHIVED)     -->
+  <!-- ========================================================= -->
+  <div id="ideaModalBackdrop" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="card-3d bg-white w-full max-w-xl p-5 sm:p-6 my-8 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b-2 border-slate-100 pb-3 mb-4">
+        <h3 id="ideaModalTitle" class="text-lg sm:text-xl font-black text-slate-800">✨ Capture New Idea</h3>
+        <button onclick="closeIdeaModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-black">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="ideaForm" onsubmit="handleIdeaFormSubmit(event)" class="space-y-4">
+        <input type="hidden" id="ideaFormId" />
+
+        <!-- Title (Required) -->
+        <div>
+          <label class="block text-xs font-black uppercase text-slate-500 mb-1">Idea Title *</label>
+          <input
+            type="text"
+            id="ideaFormTitle"
+            required
+            placeholder="e.g., Modular Gridfinity Soldering Station"
+            class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-[#1CB0F6] focus:outline-none text-sm font-extrabold text-slate-800"
+          />
+        </div>
+
+        <!-- Category & Status Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-black uppercase text-slate-500 mb-1">Category</label>
+            <select id="ideaFormCategory" class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-[#1CB0F6] focus:outline-none text-sm font-extrabold text-slate-700 bg-slate-50">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-black uppercase text-slate-500 mb-1">Status</label>
+            <select id="ideaFormStatus" class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-[#1CB0F6] focus:outline-none text-sm font-extrabold text-slate-700 bg-slate-50">
+              <option value="Idea">💡 Idea</option>
+              <option value="Planning">📐 Planning</option>
+              <option value="In Progress">🚀 In Progress</option>
+              <option value="Completed">🏆 Completed</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Priority & Favorite Toggle Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-black uppercase text-slate-500 mb-1">Priority (Optional)</label>
+            <select id="ideaFormPriority" class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-[#1CB0F6] focus:outline-none text-sm font-extrabold text-slate-700 bg-slate-50">
+              <option value="None">None</option>
+              <option value="Low">🟢 Low Priority</option>
+              <option value="Medium">🟡 Medium Priority</option>
+              <option value="High">🔥 High Priority</option>
+            </select>
+          </div>
+          <div class="flex items-end">
+            <label class="w-full flex items-center space-x-2.5 px-3.5 py-2.5 rounded-xl border-2 border-slate-200 cursor-pointer hover:bg-amber-50/40 transition">
+              <input type="checkbox" id="ideaFormFavorite" class="w-4 h-4 accent-amber-400 rounded" />
+              <span class="text-sm font-extrabold text-slate-700">⭐ Pin to Favorites</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Short Summary / Pitch -->
+        <div>
+          <label class="block text-xs font-black uppercase text-slate-500 mb-1">Short Description (Optional)</label>
+          <input
+            type="text"
+            id="ideaFormDesc"
+            placeholder="A quick one-liner explaining the concept..."
+            class="w-full px-3.5 py-2 rounded-xl border-2 border-slate-200 focus:border-[#1CB0F6] focus:outline-none text-sm font-bold text-slate-700"
+          />
+        </div>
+
+        <!-- Extended Notes & Details -->
+        <div>
+          <label class="block text-xs font-black uppercase text-slate-500 mb-1">Detailed Notes, Steps & Materials (Optional)</label>
+          <textarea
+            id="ideaFormNotes"
+            rows="4"
+            placeholder="Jot down measurements, features, checklists, or brainstorm thoughts as the idea evolves..."
+            class="w-full px-3.5 py-2 rounded-xl border-2 border-slate-200 focus:border-[#1CB0F6] focus:outline-none text-sm font-bold text-slate-700"
+          ></textarea>
+        </div>
+
+        <!-- Reference Link -->
+        <div>
+          <label class="block text-xs font-black uppercase text-slate-500 mb-1">Reference URL / Link (Optional)</label>
+          <input
+            type="text"
+            id="ideaFormLink"
+            placeholder="https://..."
+            class="w-full px-3.5 py-2 rounded-xl border-2 border-slate-200 focus:border-[#1CB0F6] focus:outline-none text-xs font-bold text-slate-700"
+          />
+        </div>
+
+        <div class="flex items-center justify-end space-x-2 pt-3 border-t-2 border-slate-100">
+          <button type="button" onclick="closeIdeaModal()" class="btn-3d btn-neutral px-4 py-2.5 rounded-xl text-xs font-extrabold">
+            Cancel
+          </button>
+          <button type="submit" class="btn-3d btn-green px-6 py-2.5 rounded-xl text-xs font-black">
+            <i class="fa-solid fa-check mr-1"></i>Save Idea
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 2: IDEA DETAIL & QUICK NOTE APPEND VIEW             -->
+  <!-- ========================================================= -->
+  <div id="detailModalBackdrop" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="card-3d bg-white w-full max-w-xl p-5 sm:p-6 my-8 max-h-[90vh] overflow-y-auto space-y-4">
+      <div class="flex items-start justify-between gap-3">
+        <div id="detailCategoryBadge" class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-black">
+          <!-- Populated dynamically -->
+        </div>
+        <div class="flex items-center space-x-1.5">
+          <button id="detailFavBtn" class="w-9 h-9 rounded-xl border-2 border-slate-200 flex items-center justify-center text-base hover:bg-slate-50 transition">
+            ⭐
+          </button>
+          <button onclick="closeDetailModal()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-black">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <h2 id="detailTitle" class="text-xl sm:text-2xl font-black text-slate-800 leading-snug"></h2>
+        <p id="detailDesc" class="text-sm font-bold text-slate-500 mt-1"></p>
+      </div>
+
+      <!-- Status & Priority Quick Switchers -->
+      <div class="flex flex-wrap items-center gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+        <div class="flex items-center space-x-1.5">
+          <span class="text-[11px] font-black uppercase text-slate-400">Status:</span>
+          <select id="detailStatusSelect" onchange="handleDetailStatusChange()" class="px-2.5 py-1 rounded-lg border border-slate-300 text-xs font-extrabold bg-white text-slate-800">
+            <option value="Idea">💡 Idea</option>
+            <option value="Planning">📐 Planning</option>
+            <option value="In Progress">🚀 In Progress</option>
+            <option value="Completed">🏆 Completed</option>
+          </select>
+        </div>
+
+        <div class="flex items-center space-x-1.5">
+          <span class="text-[11px] font-black uppercase text-slate-400">Category:</span>
+          <select id="detailCategorySelect" onchange="handleDetailCategoryMove()" class="px-2.5 py-1 rounded-lg border border-slate-300 text-xs font-extrabold bg-white text-slate-800">
+          </select>
+        </div>
+
+        <span id="detailPriorityBadge" class="ml-auto text-xs font-black px-2.5 py-0.5 rounded-full"></span>
+      </div>
+
+      <!-- Notes Box + Quick Append Note -->
+      <div class="space-y-2">
+        <label class="block text-xs font-black uppercase text-slate-400">Notes & Details</label>
+        <div id="detailNotesBox" class="p-4 rounded-2xl bg-amber-50/50 border-2 border-amber-200/70 text-xs sm:text-sm font-bold text-slate-700 whitespace-pre-wrap leading-relaxed min-h-[70px]">
+        </div>
+
+        <!-- Quick Append Input -->
+        <form onsubmit="handleQuickAppendNote(event)" class="flex gap-2 pt-1">
+          <input
+            type="text"
+            id="detailQuickNoteInput"
+            placeholder="Add a quick update or note..."
+            class="flex-1 px-3 py-2 rounded-xl border-2 border-slate-200 focus:border-[#1CB0F6] focus:outline-none text-xs font-bold"
+          />
+          <button type="submit" class="btn-3d btn-blue px-3.5 py-2 rounded-xl text-xs font-black shrink-0">
+            + Add Note
+          </button>
+        </form>
+      </div>
+
+      <!-- Reference Link -->
+      <div id="detailLinkContainer" class="hidden">
+        <span class="block text-xs font-black uppercase text-slate-400 mb-1">Reference Link</span>
+        <a id="detailLinkAnchor" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-1.5 text-xs font-extrabold text-[#1CB0F6] hover:underline break-all bg-[#EBF9FF] px-3 py-2 rounded-xl border border-[#BCE3FF]">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          <span id="detailLinkText"></span>
+        </a>
+      </div>
+
+      <div class="text-[11px] font-bold text-slate-400 pt-2 border-t border-slate-100 flex items-center justify-between">
+        <span id="detailMetaTimestamp"></span>
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="flex items-center justify-between pt-2 border-t-2 border-slate-100">
+        <button onclick="deleteIdeaFromDetail()" class="btn-3d btn-red px-3.5 py-2 rounded-xl text-xs font-black flex items-center space-x-1.5">
+          <i class="fa-solid fa-trash-can"></i>
+          <span>Delete</span>
+        </button>
+        <div class="flex items-center space-x-2">
+          <button onclick="openEditFromDetail()" class="btn-3d btn-neutral px-4 py-2 rounded-xl text-xs font-extrabold flex items-center space-x-1.5">
+            <i class="fa-solid fa-pen"></i>
+            <span>Full Edit</span>
+          </button>
+          <button onclick="closeDetailModal()" class="btn-3d btn-green px-5 py-2 rounded-xl text-xs font-black">
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 3: CREATE / CUSTOMIZE CATEGORY MODAL                -->
+  <!-- ========================================================= -->
+  <div id="categoryModalBackdrop" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="card-3d bg-white w-full max-w-md p-5 sm:p-6 space-y-4">
+      <div class="flex items-center justify-between border-b-2 border-slate-100 pb-3">
+        <h3 id="categoryModalHeading" class="text-lg font-black text-slate-800">🎨 Customize Category</h3>
+        <button onclick="closeCategoryModal()" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleCategoryFormSubmit(event)" class="space-y-4">
+        <input type="hidden" id="catFormId" />
+
+        <div>
+          <label class="block text-xs font-black uppercase text-slate-500 mb-1">Category Name *</label>
+          <input
+            type="text"
+            id="catFormName"
+            required
+            placeholder="e.g., Woodworking & CNC"
+            class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 focus:border-[#1CB0F6] focus:outline-none text-sm font-extrabold"
+          />
+        </div>
+
+        <!-- Icon / Emoji Picker -->
+        <div>
+          <label class="block text-xs font-black uppercase text-slate-500 mb-1">Icon or Emoji *</label>
+          <div class="flex items-center space-x-2 mb-2">
+            <input
+              type="text"
+              id="catFormIcon"
+              required
+              maxlength="4"
+              class="w-16 text-center text-2xl py-1.5 rounded-xl border-2 border-slate-200 font-black"
+              value="💡"
+            />
+            <span class="text-xs font-bold text-slate-400">Type any emoji or pick a preset below:</span>
+          </div>
+          <div class="grid grid-cols-8 gap-1.5 bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
+            <button type="button" onclick="selectPresetEmoji('🖨️')" class="text-xl p-1 hover:bg-white rounded-lg transition">🖨️</button>
+            <button type="button" onclick="selectPresetEmoji('💻')" class="text-xl p-1 hover:bg-white rounded-lg transition">💻</button>
+            <button type="button" onclick="selectPresetEmoji('❤️')" class="text-xl p-1 hover:bg-white rounded-lg transition">❤️</button>
+            <button type="button" onclick="selectPresetEmoji('🛠️')" class="text-xl p-1 hover:bg-white rounded-lg transition">🛠️</button>
+            <button type="button" onclick="selectPresetEmoji('💡')" class="text-xl p-1 hover:bg-white rounded-lg transition">💡</button>
+            <button type="button" onclick="selectPresetEmoji('📷')" class="text-xl p-1 hover:bg-white rounded-lg transition">📷</button>
+            <button type="button" onclick="selectPresetEmoji('🤖')" class="text-xl p-1 hover:bg-white rounded-lg transition">🤖</button>
+            <button type="button" onclick="selectPresetEmoji('🎨')" class="text-xl p-1 hover:bg-white rounded-lg transition">🎨</button>
+            <button type="button" onclick="selectPresetEmoji('🏕️')" class="text-xl p-1 hover:bg-white rounded-lg transition">🏕️</button>
+            <button type="button" onclick="selectPresetEmoji('🍳')" class="text-xl p-1 hover:bg-white rounded-lg transition">🍳</button>
+            <button type="button" onclick="selectPresetEmoji('🎸')" class="text-xl p-1 hover:bg-white rounded-lg transition">🎸</button>
+            <button type="button" onclick="selectPresetEmoji('📚')" class="text-xl p-1 hover:bg-white rounded-lg transition">📚</button>
+            <button type="button" onclick="selectPresetEmoji('🌱')" class="text-xl p-1 hover:bg-white rounded-lg transition">🌱</button>
+            <button type="button" onclick="selectPresetEmoji('✈️')" class="text-xl p-1 hover:bg-white rounded-lg transition">✈️</button>
+            <button type="button" onclick="selectPresetEmoji('🎮')" class="text-xl p-1 hover:bg-white rounded-lg transition">🎮</button>
+            <button type="button" onclick="selectPresetEmoji('🐢')" class="text-xl p-1 hover:bg-white rounded-lg transition">🐢</button>
+          </div>
+        </div>
+
+        <!-- Theme Color Picker -->
+        <div>
+          <label class="block text-xs font-black uppercase text-slate-500 mb-1.5">Category Color Theme</label>
+          <input type="hidden" id="catFormColor" value="emerald" />
+          <div id="catColorChoices" class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end space-x-2 pt-3 border-t-2 border-slate-100">
+          <button type="button" onclick="closeCategoryModal()" class="btn-3d btn-neutral px-4 py-2 rounded-xl text-xs font-extrabold">
+            Cancel
+          </button>
+          <button type="submit" class="btn-3d btn-green px-5 py-2 rounded-xl text-xs font-black">
+            Save Category
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 4: GOOGLE SHEETS CSV IMPORT MODAL                   -->
+  <!-- ========================================================= -->
+  <div id="sheetsImportModalBackdrop" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="card-3d bg-white w-full max-w-lg p-5 sm:p-6 my-8 space-y-5">
+      <div class="flex items-center justify-between border-b-2 border-slate-100 pb-3">
+        <div class="flex items-center space-x-2.5">
+          <span class="w-9 h-9 rounded-xl bg-[#F5E6FF] text-[#A855F7] flex items-center justify-center text-lg">
+            <i class="fa-solid fa-table"></i>
+          </span>
+          <h3 class="text-lg font-black text-slate-800">Import from Google Sheets</h3>
+        </div>
+        <button onclick="closeSheetsImportModal()" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Option A: Upload .CSV File from Google Sheets -->
+      <div class="p-4 rounded-2xl bg-slate-50 border-2 border-slate-200 space-y-2.5">
+        <div class="text-xs font-black uppercase tracking-wider text-[#A855F7]">Option A: Upload .CSV File (Recommended)</div>
+        <p class="text-xs font-bold text-slate-500">
+          In Google Sheets, click <strong>File → Download → Comma Separated Values (.csv)</strong>, then select the file below:
+        </p>
+        <input type="file" id="csvFileInput" accept=".csv,text/csv" onchange="handleCSVFileUpload(event)" class="hidden" />
+        <button onclick="document.getElementById('csvFileInput').click()" class="btn-3d btn-purple w-full py-2.5 rounded-xl text-xs font-black flex items-center justify-center space-x-2">
+          <i class="fa-solid fa-file-csv"></i>
+          <span>Choose .CSV File from Device</span>
+        </button>
+      </div>
+
+      <!-- Option B: Paste Published Google Sheet CSV Link or Raw CSV Text -->
+      <div class="p-4 rounded-2xl bg-slate-50 border-2 border-slate-200 space-y-3">
+        <div class="text-xs font-black uppercase tracking-wider text-[#1CB0F6]">Option B: Paste Published Sheet URL or CSV Rows</div>
+        <p class="text-xs font-bold text-slate-500">
+          Paste a published Google Sheets CSV link (<strong>File → Share → Publish to web → CSV</strong>) or paste CSV text directly:
+        </p>
+        <textarea
+          id="sheetsUrlOrTextInput"
+          rows="3"
+          placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv  OR  paste CSV rows with headers..."
+          class="w-full px-3 py-2 rounded-xl border-2 border-slate-200 focus:border-[#1CB0F6] focus:outline-none text-xs font-bold text-slate-700"
+        ></textarea>
+        <button onclick="handleSheetsUrlOrTextImport()" class="btn-3d btn-blue w-full py-2.5 rounded-xl text-xs font-black flex items-center justify-center space-x-2">
+          <i class="fa-solid fa-cloud-arrow-down"></i>
+          <span>Fetch & Import Ideas</span>
+        </button>
+      </div>
+
+      <div class="text-[11px] font-bold text-slate-400 bg-slate-100/70 p-3 rounded-xl">
+        <strong>Supported Columns:</strong> <code>Category</code>, <code>Title</code>, <code>Description</code>, <code>Status</code>, <code>Priority</code>, <code>Favorite</code>, <code>Notes</code>, <code>Creation Date</code>, <code>Links</code>. (Only <code>Title</code> is required!)
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 5: CUSTOM CONFIRMATION / RESTORE DIALOG             -->
+  <!-- ========================================================= -->
+  <div id="confirmModalBackdrop" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="card-3d bg-white w-full max-w-md p-6 space-y-4 text-center">
+      <div id="confirmModalIcon" class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-500 flex items-center justify-center text-3xl mx-auto">
+        ⚠️
+      </div>
+      <h3 id="confirmModalTitle" class="text-lg font-black text-slate-800">Are you sure?</h3>
+      <p id="confirmModalMessage" class="text-xs sm:text-sm font-bold text-slate-500 leading-relaxed"></p>
+      <div id="confirmModalActions" class="flex flex-wrap items-center justify-center gap-2 pt-2">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- TOAST NOTIFICATION BANNER                                 -->
+  <!-- ========================================================= -->
+  <div id="toastNotification" class="fixed bottom-20 md:bottom-6 right-4 z-50 hidden transform transition-all duration-300">
+    <div class="bg-slate-800 text-white px-4 py-3 rounded-2xl shadow-xl border-b-4 border-slate-950 flex items-center space-x-2.5 text-xs sm:text-sm font-extrabold">
+      <span id="toastEmoji" class="text-lg">🐢</span>
+      <span id="toastText">Saved to Shelly's Vault!</span>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- APPLICATION JAVASCRIPT (MODULAR & CLEAN)                  -->
+  <!-- ========================================================= -->
+  <script>
+    const STORAGE_KEY = 'shellys_vault_v1';
+
+    // Cohesive color themes for categories
+    const COLOR_PALETTES = {
+      emerald: {
+        name: 'Emerald',
+        bg: 'bg-[#58CC02]',
+        border: 'border-[#46A302]',
+        lightBg: 'bg-[#D7FFB8]',
+        lightText: 'text-[#357B01]',
+        hex: '#58CC02'
+      },
+      sky: {
+        name: 'Sky Blue',
+        bg: 'bg-[#1CB0F6]',
+        border: 'border-[#1899D6]',
+        lightBg: 'bg-[#DDF4FF]',
+        lightText: 'text-[#0F75A5]',
+        hex: '#1CB0F6'
+      },
+      rose: {
+        name: 'Rose Pink',
+        bg: 'bg-[#FF4B4B]',
+        border: 'border-[#EA2B2B]',
+        lightBg: 'bg-[#FFDFE0]',
+        lightText: 'text-[#C81A1A]',
+        hex: '#FF4B4B'
+      },
+      amber: {
+        name: 'Amber Gold',
+        bg: 'bg-[#FF9600]',
+        border: 'border-[#CC7800]',
+        lightBg: 'bg-[#FFF0D6]',
+        lightText: 'text-[#B86C00]',
+        hex: '#FF9600'
+      },
+      violet: {
+        name: 'Violet',
+        bg: 'bg-[#A855F7]',
+        border: 'border-[#7E22CE]',
+        lightBg: 'bg-[#F5E6FF]',
+        lightText: 'text-[#6B21A8]',
+        hex: '#A855F7'
+      },
+      teal: {
+        name: 'Teal',
+        bg: 'bg-[#14B8A6]',
+        border: 'border-[#0D9488]',
+        lightBg: 'bg-[#CCFBF1]',
+        lightText: 'text-[#0F766E]',
+        hex: '#14B8A6'
+      }
+    };
+
+    const SHELLY_TIPS = [
+      "Don't worry about perfection! Capture a quick title now and flesh out the notes later.",
+      "Tap the ⭐ star on any idea card to pin it right to your Home Screen!",
+      "Need weekend inspiration? Hit 'Surprise Me!' and I'll fish a random project out of your vault.",
+      "Pro tip: Click 'Save Backup' in the top bar anytime to keep a personal JSON copy of your ideas!",
+      "You can import or export spreadsheets anytime in the Categories & Data tab.",
+      "Finished building something? Mark its status as 🏆 Completed so we can celebrate!"
+    ];
+
+    // Default Initial Categories (User-configurable in localStorage)
+    function getDefaultCategories() {
+      return [
+        { id: 'cat_3d', name: '3D Printing', icon: '🖨️', color: 'emerald', order: 0 },
+        { id: 'cat_code', name: 'Coding & Software', icon: '💻', color: 'sky', order: 1 },
+        { id: 'cat_date', name: 'Date Ideas', icon: '❤️', color: 'rose', order: 2 },
+        { id: 'cat_proj', name: 'Personal Projects', icon: '🛠️', color: 'amber', order: 3 },
+        { id: 'cat_gen', name: 'General Ideas', icon: '💡', color: 'violet', order: 4 }
+      ];
+    }
+
+    // Main Application State (Starts clean with 0 sample ideas)
+    let appState = {
+      version: 1,
+      settings: {
+        soundEnabled: true,
+        layoutMode: 'grid'
+      },
+      categories: [],
+      ideas: []
+    };
+
+    let currentView = 'home';
+    let activeCategoryId = null;
+    let activeDetailIdeaId = null;
+    let homeFavoriteOnly = false;
+
+    // =========================================================
+    // SOUND ENGINE (WEB AUDIO API)
+    // =========================================================
+    let audioCtx = null;
+    function playChime(type = 'save') {
+      if (!appState.settings.soundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+
+        if (type === 'save') {
+          osc.frequency.setValueAtTime(523.25, now); // C5
+          osc.frequency.setValueAtTime(659.25, now + 0.07); // E5
+          osc.frequency.setValueAtTime(783.99, now + 0.14); // G5
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.38);
+        } else if (type === 'star') {
+          osc.frequency.setValueAtTime(659.25, now);
+          osc.frequency.setValueAtTime(987.77, now + 0.08);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        }
+      } catch (e) {}
+    }
+
+    // =========================================================
+    // LOCALSTORAGE PERSISTENCE
+    // =========================================================
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          appState = {
+            version: 1,
+            settings: { soundEnabled: true, layoutMode: 'grid', ...(parsed.settings || {}) },
+            categories: Array.isArray(parsed.categories) && parsed.categories.length > 0 ? parsed.categories : getDefaultCategories(),
+            ideas: Array.isArray(parsed.ideas) ? parsed.ideas : []
+          };
+        } else {
+          appState.categories = getDefaultCategories();
+          appState.ideas = [];
+          saveState();
+        }
+      } catch (err) {
+        console.error('Error loading local state:', err);
+        appState.categories = getDefaultCategories();
+        appState.ideas = [];
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (err) {
+        showToast('⚠️ Browser storage full! Please export a backup.', '⚠️');
+      }
+    }
+
+    // =========================================================
+    // NAVIGATION & VIEW MANAGEMENT
+    // =========================================================
+    function navigateTo(viewName, categoryId = null) {
+      currentView = viewName;
+      if (categoryId) activeCategoryId = categoryId;
+
+      ['home', 'category', 'settings'].forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.classList.toggle('hidden', v !== viewName);
+      });
+
+      // Update Desktop & Mobile Nav Active Styles
+      ['home', 'settings'].forEach(navKey => {
+        const isCurrent = (viewName === navKey) || (viewName === 'category' && navKey === 'home');
+        const deskBtn = document.getElementById(`desk-nav-${navKey}`);
+        if (deskBtn) {
+          deskBtn.className = isCurrent
+            ? 'px-4 py-2 rounded-2xl font-extrabold text-sm transition flex items-center space-x-2 bg-[#D7FFB8]/60 text-[#46A302] border-2 border-[#58CC02]'
+            : 'px-4 py-2 rounded-2xl font-extrabold text-sm text-slate-500 hover:bg-slate-100 transition flex items-center space-x-2 border-2 border-transparent';
+        }
+        const mobBtn = document.getElementById(`mob-nav-${navKey}`);
+        if (mobBtn) {
+          mobBtn.className = isCurrent
+            ? 'flex flex-col items-center justify-center py-1 rounded-xl text-[#58CC02] font-black'
+            : 'flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 font-bold';
+        }
+      });
+
+      refreshAllUI();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function refreshAllUI() {
+      populateCategoryDropdowns();
+      if (currentView === 'home') renderHomeView();
+      if (currentView === 'category') renderCategoryView();
+      if (currentView === 'settings') renderSettingsView();
+      updateLayoutToggleButtons();
+    }
+
+    function populateCategoryDropdowns() {
+      const sortedCats = [...appState.categories].sort((a, b) => a.order - b.order);
+      const optionsHtml = sortedCats.map(c => `<option value="${c.id}">${c.icon} ${escapeHtml(c.name)}</option>`).join('');
+
+      const quickSelect = document.getElementById('quickCaptureCategory');
+      if (quickSelect) {
+        const currentVal = quickSelect.value;
+        quickSelect.innerHTML = optionsHtml;
+        if (currentVal && sortedCats.some(c => c.id === currentVal)) {
+          quickSelect.value = currentVal;
+        } else {
+          const genCat = sortedCats.find(c => c.id === 'cat_gen') || sortedCats[0];
+          if (genCat) quickSelect.value = genCat.id;
+        }
+      }
+
+      const formSelect = document.getElementById('ideaFormCategory');
+      if (formSelect) formSelect.innerHTML = optionsHtml;
+
+      const detailSelect = document.getElementById('detailCategorySelect');
+      if (detailSelect) detailSelect.innerHTML = optionsHtml;
+
+      const homeCatFilter = document.getElementById('homeCategoryFilter');
+      if (homeCatFilter) {
+        const prev = homeCatFilter.value || 'all';
+        homeCatFilter.innerHTML = `<option value="all">All Categories</option>` + optionsHtml;
+        homeCatFilter.value = sortedCats.some(c => c.id === prev) ? prev : 'all';
+      }
+    }
+
+    // =========================================================
+    // HOME SCREEN RENDERING
+    // =========================================================
+    function renderHomeView() {
+      const ideas = appState.ideas;
+      document.getElementById('statTotalIdeas').textContent = ideas.length;
+      document.getElementById('statInProgress').textContent = ideas.filter(i => i.status === 'In Progress').length;
+      document.getElementById('statFavorites').textContent = ideas.filter(i => i.favorite).length;
+      document.getElementById('statCompleted').textContent = ideas.filter(i => i.status === 'Completed').length;
+
+      // Render Category Cards
+      const sortedCats = [...appState.categories].sort((a, b) => a.order - b.order);
+      const catGrid = document.getElementById('homeCategoriesGrid');
+      catGrid.innerHTML = sortedCats.map(cat => {
+        const palette = COLOR_PALETTES[cat.color] || COLOR_PALETTES.emerald;
+        const catIdeas = ideas.filter(i => i.categoryId === cat.id);
+        const inProgCount = catIdeas.filter(i => i.status === 'In Progress').length;
+
+        return `
+          <div onclick="navigateTo('category', '${cat.id}')" class="card-3d card-3d-interactive p-5 cursor-pointer flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-3">
+              <div class="w-14 h-14 rounded-2xl ${palette.lightBg} border-2 ${palette.border} flex items-center justify-center text-3xl shadow-2xs shrink-0">
+                ${cat.icon}
+              </div>
+              <div class="flex items-center space-x-1">
+                <button onclick="event.stopPropagation(); openIdeaModal(null, '${cat.id}')" title="Quick add to ${escapeHtml(cat.name)}" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-[#D7FFB8] text-slate-600 hover:text-[#46A302] flex items-center justify-center text-xs font-black transition">
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <h3 class="text-base sm:text-lg font-black text-slate-800">${escapeHtml(cat.name)}</h3>
+              <div class="flex items-center justify-between text-xs font-extrabold text-slate-400 mt-1">
+                <span>${catIdeas.length} ${catIdeas.length === 1 ? 'idea' : 'ideas'}</span>
+                ${inProgCount > 0 ? `<span class="text-[#FF9600]">🚀 ${inProgCount} active</span>` : ''}
+              </div>
+            </div>
+
+            <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-black ${palette.lightText}">
+              <span>Open Category</span>
+              <i class="fa-solid fa-chevron-right text-xs"></i>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Render Favorites Section
+      const favIdeas = ideas.filter(i => i.favorite).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      const favSection = document.getElementById('homeFavoritesSection');
+      const favGrid = document.getElementById('homeFavoritesGrid');
+      if (favIdeas.length === 0) {
+        favSection.classList.add('hidden');
+      } else {
+        favSection.classList.remove('hidden');
+        favGrid.innerHTML = favIdeas.slice(0, 6).map(i => renderIdeaCardHTML(i)).join('');
+      }
+
+      // Render All / Filtered Ideas on Home
+      renderHomeAllIdeas();
+    }
+
+    function filterHomeIdeasByStat(statType) {
+      document.getElementById('homeCategoryFilter').value = 'all';
+      document.getElementById('homeSearchInput').value = '';
+      if (statType === 'all') {
+        document.getElementById('homeStatusFilter').value = 'all';
+        homeFavoriteOnly = false;
+      } else if (statType === 'favorites') {
+        document.getElementById('homeStatusFilter').value = 'all';
+        homeFavoriteOnly = true;
+      } else {
+        document.getElementById('homeStatusFilter').value = statType;
+        homeFavoriteOnly = false;
+      }
+      updateHomeFavChipUI();
+      renderHomeAllIdeas();
+      document.getElementById('homeAllIdeasSection')?.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function toggleHomeFavoriteFilter() {
+      homeFavoriteOnly = !homeFavoriteOnly;
+      updateHomeFavChipUI();
+      renderHomeAllIdeas();
+    }
+
+    function updateHomeFavChipUI() {
+      const chip = document.getElementById('homeFavChip');
+      if (!chip) return;
+      chip.className = homeFavoriteOnly
+        ? 'px-3 py-2 rounded-xl text-xs font-black border-2 border-amber-400 bg-amber-100 text-amber-800 transition'
+        : 'px-3 py-2 rounded-xl text-xs font-extrabold border-2 border-slate-200 text-slate-600 hover:bg-slate-100 transition';
+    }
+
+    function renderHomeAllIdeas() {
+      const searchQ = (document.getElementById('homeSearchInput')?.value || '').trim().toLowerCase();
+      const catFilter = document.getElementById('homeCategoryFilter')?.value || 'all';
+      const statusFilter = document.getElementById('homeStatusFilter')?.value || 'all';
+      const sortBy = document.getElementById('homeSortSelect')?.value || 'newest';
+
+      let list = [...appState.ideas];
+
+      if (catFilter !== 'all') {
+        list = list.filter(i => i.categoryId === catFilter);
+      }
+      if (statusFilter !== 'all') {
+        list = list.filter(i => i.status === statusFilter);
+      }
+      if (homeFavoriteOnly) {
+        list = list.filter(i => i.favorite);
+      }
+      if (searchQ) {
+        list = list.filter(i => matchesSearch(i, searchQ));
+      }
+
+      list = sortIdeasList(list, sortBy);
+
+      const countEl = document.getElementById('homeResultCount');
+      if (countEl) countEl.textContent = `${list.length} ${list.length === 1 ? 'idea' : 'ideas'}`;
+
+      const recentGrid = document.getElementById('homeRecentGrid');
+      const mode = appState.settings.layoutMode || 'grid';
+
+      if (appState.ideas.length === 0) {
+        recentGrid.className = '';
+        recentGrid.innerHTML = `
+          <div class="card-3d p-8 text-center space-y-2.5 bg-white">
+            <div class="text-4xl">🌱</div>
+            <h3 class="text-base font-black text-slate-700">Shelly's Vault is Ready for Your First Idea!</h3>
+            <p class="text-xs font-bold text-slate-400 max-w-md mx-auto">
+              Type a quick title in the Instant Capture bar above, click "+ New Idea", or import a spreadsheet in the Categories & Data tab.
+            </p>
+          </div>
+        `;
+      } else if (list.length === 0) {
+        recentGrid.className = '';
+        recentGrid.innerHTML = `
+          <div class="card-3d p-8 text-center space-y-2 bg-white">
+            <div class="text-3xl">🔍</div>
+            <h3 class="text-sm font-black text-slate-700">No matching ideas found</h3>
+            <p class="text-xs font-bold text-slate-400">Try clearing your search or switching the category/status filter.</p>
+          </div>
+        `;
+      } else {
+        recentGrid.className = mode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-2.5';
+        recentGrid.innerHTML = list.map(i => renderIdeaCardHTML(i, mode)).join('');
+      }
+    }
+
+    // =========================================================
+    // SHARED IDEA CARD & LIST ITEM RENDERER (NO TAGS)
+    // =========================================================
+    function getStatusBadgeInfo(status) {
+      switch (status) {
+        case 'Planning': return { icon: '📐', classes: 'bg-sky-100 text-sky-700 border-sky-300' };
+        case 'In Progress': return { icon: '🚀', classes: 'bg-amber-100 text-amber-800 border-amber-300' };
+        case 'Completed': return { icon: '🏆', classes: 'bg-[#D7FFB8] text-[#357B01] border-[#58CC02]' };
+        default: return { icon: '💡', classes: 'bg-purple-100 text-purple-700 border-purple-300' };
+      }
+    }
+
+    function getPriorityBadgeHTML(priority) {
+      if (!priority || priority === 'None') return '';
+      if (priority === 'High') return `<span class="text-[10px] font-black px-2 py-0.5 rounded-md bg-red-100 text-red-600">🔥 High</span>`;
+      if (priority === 'Medium') return `<span class="text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-100 text-amber-700">🟡 Med</span>`;
+      return `<span class="text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700">🟢 Low</span>`;
+    }
+
+    function renderIdeaCardHTML(idea, mode = 'grid') {
+      const cat = appState.categories.find(c => c.id === idea.categoryId) || { name: 'Uncategorized', icon: '💡', color: 'violet' };
+      const palette = COLOR_PALETTES[cat.color] || COLOR_PALETTES.violet;
+      const statusInfo = getStatusBadgeInfo(idea.status);
+      const dateStr = new Date(idea.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+      if (mode === 'list') {
+        return `
+          <div onclick="openDetailModal('${idea.id}')" class="card-3d card-3d-interactive p-3.5 cursor-pointer flex items-center justify-between gap-3">
+            <div class="flex items-center space-x-3 min-w-0 flex-1">
+              <button onclick="event.stopPropagation(); toggleFavorite('${idea.id}')" class="text-lg shrink-0 hover:scale-110 transition">
+                ${idea.favorite ? '⭐' : '<i class="fa-regular fa-star text-slate-300 hover:text-amber-400"></i>'}
+              </button>
+              <span class="w-8 h-8 rounded-xl ${palette.lightBg} flex items-center justify-center text-base shrink-0">${cat.icon}</span>
+              <div class="min-w-0 flex-1">
+                <h4 class="text-sm font-black text-slate-800 truncate">${escapeHtml(idea.title)}</h4>
+                ${idea.description ? `<p class="text-xs font-bold text-slate-400 truncate">${escapeHtml(idea.description)}</p>` : ''}
+              </div>
+            </div>
+            <div class="flex items-center space-x-2 shrink-0">
+              ${getPriorityBadgeHTML(idea.priority)}
+              <span class="text-[11px] font-black px-2.5 py-1 rounded-full border ${statusInfo.classes}">
+                ${statusInfo.icon} ${idea.status}
+              </span>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div onclick="openDetailModal('${idea.id}')" class="card-3d card-3d-interactive p-4 cursor-pointer flex flex-col justify-between space-y-3">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="inline-flex items-center space-x-1 text-[11px] font-black px-2.5 py-0.5 rounded-full ${palette.lightBg} ${palette.lightText}">
+                <span>${cat.icon}</span>
+                <span>${escapeHtml(cat.name)}</span>
+              </span>
+              <div class="flex items-center space-x-1">
+                ${getPriorityBadgeHTML(idea.priority)}
+                <button onclick="event.stopPropagation(); toggleFavorite('${idea.id}')" title="Toggle Favorite" class="w-7 h-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-sm transition">
+                  ${idea.favorite ? '⭐' : '<i class="fa-regular fa-star text-slate-300 hover:text-amber-400"></i>'}
+                </button>
+              </div>
+            </div>
+
+            <h4 class="text-base font-black text-slate-800 leading-snug line-clamp-2">${escapeHtml(idea.title)}</h4>
+            ${idea.description ? `<p class="text-xs font-bold text-slate-500 mt-1 line-clamp-2">${escapeHtml(idea.description)}</p>` : ''}
+          </div>
+
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[11px] font-black px-2.5 py-0.5 rounded-full border ${statusInfo.classes}">
+              ${statusInfo.icon} ${idea.status}
+            </span>
+            <span class="text-[11px] font-bold text-slate-400">${dateStr}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================
+    // CATEGORY VIEW RENDERING
+    // =========================================================
+    function renderCategoryView() {
+      const cat = appState.categories.find(c => c.id === activeCategoryId) || appState.categories[0];
+      if (!cat) {
+        navigateTo('home');
+        return;
+      }
+      activeCategoryId = cat.id;
+      const palette = COLOR_PALETTES[cat.color] || COLOR_PALETTES.emerald;
+
+      const banner = document.getElementById('categoryBanner');
+      banner.className = `card-3d p-6 text-white relative overflow-hidden ${palette.bg} border-b-4 ${palette.border}`;
+      document.getElementById('categoryBannerIcon').textContent = cat.icon;
+      document.getElementById('categoryBannerTitle').textContent = cat.name;
+
+      document.getElementById('btnEditCurrentCategory').onclick = () => openCategoryModal(cat.id);
+      document.getElementById('btnAddIdeaInCategory').onclick = () => openIdeaModal(null, cat.id);
+
+      renderCategoryViewIdeas();
+    }
+
+    function renderCategoryViewIdeas() {
+      const searchQ = (document.getElementById('catSearchInput')?.value || '').trim().toLowerCase();
+      const statusFilter = document.getElementById('catStatusFilter')?.value || 'all';
+      const sortBy = document.getElementById('catSortSelect')?.value || 'newest';
+
+      let list = appState.ideas.filter(i => i.categoryId === activeCategoryId);
+
+      if (statusFilter !== 'all') {
+        list = list.filter(i => i.status === statusFilter);
+      }
+
+      if (searchQ) {
+        list = list.filter(i => matchesSearch(i, searchQ));
+      }
+
+      list = sortIdeasList(list, sortBy);
+
+      document.getElementById('categoryBannerSubtitle').textContent = `${list.length} ${list.length === 1 ? 'idea' : 'ideas'} stored`;
+
+      const container = document.getElementById('categoryIdeasContainer');
+      const mode = appState.settings.layoutMode || 'grid';
+      if (list.length === 0) {
+        container.className = '';
+        container.innerHTML = `
+          <div class="card-3d p-8 text-center bg-white space-y-3">
+            <div class="text-4xl">✨</div>
+            <h3 class="text-base font-black text-slate-700">No ideas in this category yet!</h3>
+            <p class="text-xs font-bold text-slate-400">Click "Add Idea Here" above to save your first idea in this collection.</p>
+          </div>
+        `;
+      } else {
+        container.className = mode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-2.5';
+        container.innerHTML = list.map(i => renderIdeaCardHTML(i, mode)).join('');
+      }
+    }
+
+    function matchesSearch(idea, q) {
+      const hay = [
+        idea.title,
+        idea.description,
+        idea.notes,
+        idea.link
+      ].join(' ').toLowerCase();
+      return hay.includes(q);
+    }
+
+    function sortIdeasList(list, sortBy) {
+      const pWeight = { High: 3, Medium: 2, Low: 1, None: 0 };
+      return list.sort((a, b) => {
+        if (sortBy === 'oldest') return new Date(a.createdAt) - new Date(b.createdAt);
+        if (sortBy === 'priority') return (pWeight[b.priority] || 0) - (pWeight[a.priority] || 0);
+        if (sortBy === 'alpha') return a.title.localeCompare(b.title);
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+    }
+
+    function setIdeaLayoutMode(mode) {
+      appState.settings.layoutMode = mode;
+      saveState();
+      updateLayoutToggleButtons();
+      refreshAllUI();
+    }
+
+    function updateLayoutToggleButtons() {
+      const isGrid = appState.settings.layoutMode !== 'list';
+      const pairs = [
+        ['homeViewBtnGrid', 'homeViewBtnList'],
+        ['catViewBtnGrid', 'catViewBtnList']
+      ];
+      pairs.forEach(([gId, lId]) => {
+        const gBtn = document.getElementById(gId);
+        const lBtn = document.getElementById(lId);
+        if (gBtn && lBtn) {
+          gBtn.className = isGrid ? 'px-2.5 py-1 rounded-lg text-xs font-black bg-white shadow-2xs text-slate-800' : 'px-2.5 py-1 rounded-lg text-xs font-black text-slate-400';
+          lBtn.className = !isGrid ? 'px-2.5 py-1 rounded-lg text-xs font-black bg-white shadow-2xs text-slate-800' : 'px-2.5 py-1 rounded-lg text-xs font-black text-slate-400';
+        }
+      });
+    }
+
+    // =========================================================
+    // ADDING, EDITING & QUICK CAPTURING IDEAS
+    // =========================================================
+    function handleQuickCaptureSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('quickCaptureInput');
+      const catSelect = document.getElementById('quickCaptureCategory');
+      const title = input.value.trim();
+      if (!title) return;
+
+      const now = new Date().toISOString();
+      const newIdea = {
+        id: 'idea_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        title,
+        description: '',
+        categoryId: catSelect.value || appState.categories[0]?.id,
+        status: 'Idea',
+        priority: 'None',
+        favorite: false,
+        notes: '',
+        link: '',
+        createdAt: now,
+        updatedAt: now
+      };
+
+      appState.ideas.unshift(newIdea);
+      saveState();
+      playChime('save');
+      input.value = '';
+      refreshAllUI();
+      animateShellyReaction(`Awesome! "${title}" is safely tucked into Shelly's Vault!`);
+      showToast('⚡ Idea captured!', '🐢');
+    }
+
+    function openIdeaModal(ideaId = null, prefillCategoryId = null) {
+      populateCategoryDropdowns();
+      const modal = document.getElementById('ideaModalBackdrop');
+      const heading = document.getElementById('ideaModalTitle');
+
+      if (ideaId) {
+        const idea = appState.ideas.find(i => i.id === ideaId);
+        if (!idea) return;
+        heading.textContent = '✏️ Edit Idea';
+        document.getElementById('ideaFormId').value = idea.id;
+        document.getElementById('ideaFormTitle').value = idea.title;
+        document.getElementById('ideaFormCategory').value = idea.categoryId;
+        document.getElementById('ideaFormStatus').value = idea.status || 'Idea';
+        document.getElementById('ideaFormPriority').value = idea.priority || 'None';
+        document.getElementById('ideaFormFavorite').checked = !!idea.favorite;
+        document.getElementById('ideaFormDesc').value = idea.description || '';
+        document.getElementById('ideaFormNotes').value = idea.notes || '';
+        document.getElementById('ideaFormLink').value = idea.link || '';
+      } else {
+        heading.textContent = '✨ Capture New Idea';
+        document.getElementById('ideaForm').reset();
+        document.getElementById('ideaFormId').value = '';
+        const targetCat = prefillCategoryId || (currentView === 'category' ? activeCategoryId : 'cat_gen');
+        if (targetCat && appState.categories.some(c => c.id === targetCat)) {
+          document.getElementById('ideaFormCategory').value = targetCat;
+        }
+      }
+
+      modal.classList.remove('hidden');
+      setTimeout(() => document.getElementById('ideaFormTitle').focus(), 50);
+    }
+
+    function closeIdeaModal() {
+      document.getElementById('ideaModalBackdrop').classList.add('hidden');
+    }
+
+    function handleIdeaFormSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('ideaFormId').value;
+      const title = document.getElementById('ideaFormTitle').value.trim();
+      if (!title) return;
+
+      const categoryId = document.getElementById('ideaFormCategory').value;
+      const status = document.getElementById('ideaFormStatus').value;
+      const priority = document.getElementById('ideaFormPriority').value;
+      const favorite = document.getElementById('ideaFormFavorite').checked;
+      const description = document.getElementById('ideaFormDesc').value.trim();
+      const notes = document.getElementById('ideaFormNotes').value.trim();
+      const link = document.getElementById('ideaFormLink').value.trim();
+      const now = new Date().toISOString();
+
+      if (id) {
+        const idx = appState.ideas.findIndex(i => i.id === id);
+        if (idx > -1) {
+          appState.ideas[idx] = {
+            ...appState.ideas[idx],
+            title,
+            categoryId,
+            status,
+            priority,
+            favorite,
+            description,
+            notes,
+            link,
+            updatedAt: now
+          };
+        }
+        showToast('Idea updated!', '✨');
+      } else {
+        appState.ideas.unshift({
+          id: 'idea_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          title,
+          categoryId,
+          status,
+          priority,
+          favorite,
+          description,
+          notes,
+          link,
+          createdAt: now,
+          updatedAt: now
+        });
+        showToast('New idea saved to Shelly\'s Vault!', '🐢');
+      }
+
+      saveState();
+      playChime('save');
+      closeIdeaModal();
+      refreshAllUI();
+      if (activeDetailIdeaId === id) openDetailModal(id);
+    }
+
+    function toggleFavorite(ideaId) {
+      const idea = appState.ideas.find(i => i.id === ideaId);
+      if (!idea) return;
+      idea.favorite = !idea.favorite;
+      idea.updatedAt = new Date().toISOString();
+      saveState();
+      if (idea.favorite) playChime('star');
+      refreshAllUI();
+      if (activeDetailIdeaId === ideaId) openDetailModal(ideaId);
+    }
+
+    // =========================================================
+    // IDEA DETAIL MODAL & QUICK NOTE APPENDING
+    // =========================================================
+    function openDetailModal(ideaId) {
+      const idea = appState.ideas.find(i => i.id === ideaId);
+      if (!idea) return;
+      activeDetailIdeaId = ideaId;
+      populateCategoryDropdowns();
+
+      const cat = appState.categories.find(c => c.id === idea.categoryId) || { name: 'Uncategorized', icon: '💡', color: 'violet' };
+      const palette = COLOR_PALETTES[cat.color] || COLOR_PALETTES.violet;
+
+      const badge = document.getElementById('detailCategoryBadge');
+      badge.className = `inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-black ${palette.lightBg} ${palette.lightText}`;
+      badge.innerHTML = `<span>${cat.icon}</span><span>${escapeHtml(cat.name)}</span>`;
+
+      const favBtn = document.getElementById('detailFavBtn');
+      favBtn.innerHTML = idea.favorite ? '⭐' : '<i class="fa-regular fa-star text-slate-400"></i>';
+      favBtn.onclick = () => toggleFavorite(idea.id);
+
+      document.getElementById('detailTitle').textContent = idea.title;
+      document.getElementById('detailDesc').textContent = idea.description || '';
+      document.getElementById('detailStatusSelect').value = idea.status;
+      document.getElementById('detailCategorySelect').value = idea.categoryId;
+
+      const pBadge = document.getElementById('detailPriorityBadge');
+      pBadge.innerHTML = getPriorityBadgeHTML(idea.priority);
+
+      const notesBox = document.getElementById('detailNotesBox');
+      notesBox.textContent = idea.notes || 'No detailed notes yet. Use the box below to jot down thoughts as this idea develops!';
+
+      const linkContainer = document.getElementById('detailLinkContainer');
+      const linkAnchor = document.getElementById('detailLinkAnchor');
+      const linkText = document.getElementById('detailLinkText');
+      if (idea.link) {
+        linkContainer.classList.remove('hidden');
+        const href = idea.link.startsWith('http') ? idea.link : `https://${idea.link}`;
+        linkAnchor.href = href;
+        linkText.textContent = idea.link;
+      } else {
+        linkContainer.classList.add('hidden');
+      }
+
+      const createdDate = new Date(idea.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+      document.getElementById('detailMetaTimestamp').textContent = `Created ${createdDate}`;
+
+      document.getElementById('detailModalBackdrop').classList.remove('hidden');
+    }
+
+    function closeDetailModal() {
+      activeDetailIdeaId = null;
+      document.getElementById('detailModalBackdrop').classList.add('hidden');
+    }
+
+    function handleDetailStatusChange() {
+      const idea = appState.ideas.find(i => i.id === activeDetailIdeaId);
+      if (!idea) return;
+      idea.status = document.getElementById('detailStatusSelect').value;
+      idea.updatedAt = new Date().toISOString();
+      saveState();
+      playChime('save');
+      refreshAllUI();
+      showToast(`Status updated to ${idea.status}`, '🚀');
+    }
+
+    function handleDetailCategoryMove() {
+      const idea = appState.ideas.find(i => i.id === activeDetailIdeaId);
+      if (!idea) return;
+      idea.categoryId = document.getElementById('detailCategorySelect').value;
+      idea.updatedAt = new Date().toISOString();
+      saveState();
+      openDetailModal(idea.id);
+      refreshAllUI();
+      showToast('Moved to new category!', '📁');
+    }
+
+    function handleQuickAppendNote(e) {
+      e.preventDefault();
+      const input = document.getElementById('detailQuickNoteInput');
+      const noteLine = input.value.trim();
+      if (!noteLine || !activeDetailIdeaId) return;
+
+      const idea = appState.ideas.find(i => i.id === activeDetailIdeaId);
+      if (!idea) return;
+
+      idea.notes = idea.notes ? `${idea.notes}\n• ${noteLine}` : `• ${noteLine}`;
+      idea.updatedAt = new Date().toISOString();
+      input.value = '';
+      saveState();
+      playChime('save');
+      openDetailModal(idea.id);
+      refreshAllUI();
+    }
+
+    function openEditFromDetail() {
+      const id = activeDetailIdeaId;
+      closeDetailModal();
+      openIdeaModal(id);
+    }
+
+    function deleteIdeaFromDetail() {
+      const idea = appState.ideas.find(i => i.id === activeDetailIdeaId);
+      if (!idea) return;
+      openConfirmDialog({
+        icon: '🗑️',
+        title: 'Delete this idea?',
+        message: `Are you sure you want to permanently delete "${idea.title}"?`,
+        actions: [
+          { label: 'Cancel', classes: 'btn-neutral', onClick: closeConfirmDialog },
+          {
+            label: 'Delete Permanently',
+            classes: 'btn-red',
+            onClick: () => {
+              appState.ideas = appState.ideas.filter(i => i.id !== idea.id);
+              saveState();
+              closeConfirmDialog();
+              closeDetailModal();
+              refreshAllUI();
+              showToast('Idea deleted', '🗑️');
+            }
+          }
+        ]
+      });
+    }
+
+    // =========================================================
+    // RANDOM IDEA ("SURPRISE ME!") & SHELLY INTERACTIONS
+    // =========================================================
+    function openRandomIdeaSpotlight() {
+      const candidates = appState.ideas.filter(i => i.status !== 'Completed');
+      const pool = candidates.length > 0 ? candidates : appState.ideas;
+      if (pool.length === 0) {
+        animateShellyReaction("Your vault is empty right now! Add a couple of ideas first and I'll surprise you!");
+        return;
+      }
+      const picked = pool[Math.floor(Math.random() * pool.length)];
+      playChime('star');
+      animateShellyReaction(`How about revisiting "${picked.title}" today?`);
+      openDetailModal(picked.id);
+    }
+
+    function triggerMascotPoke() {
+      const tip = SHELLY_TIPS[Math.floor(Math.random() * SHELLY_TIPS.length)];
+      animateShellyReaction(tip);
+      playChime('star');
+    }
+
+    function animateShellyReaction(speech) {
+      const textEl = document.getElementById('shellySpeechText');
+      const avatar = document.getElementById('shellyAvatarContainer');
+      if (textEl) textEl.textContent = `"${speech}"`;
+      if (avatar) {
+        avatar.classList.remove('turtle-pop');
+        void avatar.offsetWidth;
+        avatar.classList.add('turtle-pop');
+      }
+    }
+
+    // =========================================================
+    // CATEGORY CUSTOMIZATION (CREATE, EDIT, REORDER, DELETE)
+    // =========================================================
+    function renderColorChoices(selectedColor = 'emerald') {
+      document.getElementById('catFormColor').value = selectedColor;
+      const container = document.getElementById('catColorChoices');
+      container.innerHTML = Object.entries(COLOR_PALETTES).map(([key, pal]) => {
+        const isSelected = key === selectedColor;
+        return `
+          <button type="button" onclick="renderColorChoices('${key}')" class="p-2 rounded-xl border-2 flex flex-col items-center space-y-1 transition ${isSelected ? 'border-slate-800 bg-slate-100 scale-105' : 'border-slate-200 hover:bg-slate-50'}">
+            <span class="w-6 h-6 rounded-full ${pal.bg}"></span>
+            <span class="text-[10px] font-black text-slate-700">${pal.name}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectPresetEmoji(emoji) {
+      document.getElementById('catFormIcon').value = emoji;
+    }
+
+    function openCategoryModal(catId = null) {
+      const modal = document.getElementById('categoryModalBackdrop');
+      const heading = document.getElementById('categoryModalHeading');
+
+      if (catId) {
+        const cat = appState.categories.find(c => c.id === catId);
+        if (!cat) return;
+        heading.textContent = '🎨 Edit Category';
+        document.getElementById('catFormId').value = cat.id;
+        document.getElementById('catFormName').value = cat.name;
+        document.getElementById('catFormIcon').value = cat.icon;
+        renderColorChoices(cat.color || 'emerald');
+      } else {
+        heading.textContent = '📁 Create New Category';
+        document.getElementById('catFormId').value = '';
+        document.getElementById('catFormName').value = '';
+        document.getElementById('catFormIcon').value = '🚀';
+        renderColorChoices('emerald');
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeCategoryModal() {
+      document.getElementById('categoryModalBackdrop').classList.add('hidden');
+    }
+
+    function handleCategoryFormSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('catFormId').value;
+      const name = document.getElementById('catFormName').value.trim();
+      const icon = document.getElementById('catFormIcon').value.trim() || '💡';
+      const color = document.getElementById('catFormColor').value || 'emerald';
+      if (!name) return;
+
+      if (id) {
+        const cat = appState.categories.find(c => c.id === id);
+        if (cat) {
+          cat.name = name;
+          cat.icon = icon;
+          cat.color = color;
+        }
+        showToast('Category updated!', icon);
+      } else {
+        appState.categories.push({
+          id: 'cat_' + Date.now(),
+          name,
+          icon,
+          color,
+          order: appState.categories.length
+        });
+        showToast('New category added!', icon);
+      }
+
+      saveState();
+      playChime('save');
+      closeCategoryModal();
+      refreshAllUI();
+    }
+
+    function moveCategoryOrder(catId, direction) {
+      const sorted = [...appState.categories].sort((a, b) => a.order - b.order);
+      const idx = sorted.findIndex(c => c.id === catId);
+      const swapIdx = idx + direction;
+      if (idx < 0 || swapIdx < 0 || swapIdx >= sorted.length) return;
+
+      const temp = sorted[idx];
+      sorted[idx] = sorted[swapIdx];
+      sorted[swapIdx] = temp;
+      sorted.forEach((c, i) => { c.order = i; });
+      appState.categories = sorted;
+      saveState();
+      refreshAllUI();
+    }
+
+    function confirmDeleteCategory(catId) {
+      if (appState.categories.length <= 1) {
+        showToast('You must keep at least one category!', '⚠️');
+        return;
+      }
+      const cat = appState.categories.find(c => c.id === catId);
+      if (!cat) return;
+      const count = appState.ideas.filter(i => i.categoryId === catId).length;
+      const fallbackCat = appState.categories.find(c => c.id !== catId);
+
+      openConfirmDialog({
+        icon: '📁',
+        title: `Delete "${cat.name}"?`,
+        message: count > 0
+          ? `There are ${count} idea(s) in "${cat.name}". To prevent any data loss, they will be safely moved to "${fallbackCat.name}".`
+          : `Are you sure you want to remove the "${cat.name}" category?`,
+        actions: [
+          { label: 'Cancel', classes: 'btn-neutral', onClick: closeConfirmDialog },
+          {
+            label: 'Delete Category',
+            classes: 'btn-red',
+            onClick: () => {
+              if (count > 0 && fallbackCat) {
+                appState.ideas.forEach(i => {
+                  if (i.categoryId === catId) i.categoryId = fallbackCat.id;
+                });
+              }
+              appState.categories = appState.categories.filter(c => c.id !== catId);
+              saveState();
+              closeConfirmDialog();
+              refreshAllUI();
+              showToast('Category removed', '🗑️');
+            }
+          }
+        ]
+      });
+    }
+
+    function renderSettingsView() {
+      const sortedCats = [...appState.categories].sort((a, b) => a.order - b.order);
+      const container = document.getElementById('settingsCategoryList');
+
+      container.innerHTML = sortedCats.map((cat, idx) => {
+        const palette = COLOR_PALETTES[cat.color] || COLOR_PALETTES.emerald;
+        const ideaCount = appState.ideas.filter(i => i.categoryId === cat.id).length;
+
+        return `
+          <div class="p-3.5 rounded-2xl border-2 border-slate-200 flex items-center justify-between gap-3 bg-slate-50/60">
+            <div class="flex items-center space-x-3">
+              <span class="w-10 h-10 rounded-xl ${palette.lightBg} border ${palette.border} flex items-center justify-center text-xl">${cat.icon}</span>
+              <div>
+                <div class="text-sm font-black text-slate-800">${escapeHtml(cat.name)}</div>
+                <div class="text-xs font-bold text-slate-400">${ideaCount} ${ideaCount === 1 ? 'idea' : 'ideas'} • ${palette.name}</div>
+              </div>
+            </div>
+            <div class="flex items-center space-x-1.5">
+              <button onclick="moveCategoryOrder('${cat.id}', -1)" ${idx === 0 ? 'disabled class="opacity-30 px-2 py-1"' : 'class="btn-3d btn-neutral px-2.5 py-1 rounded-lg text-xs font-black"'} title="Move Up">
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+              <button onclick="moveCategoryOrder('${cat.id}', 1)" ${idx === sortedCats.length - 1 ? 'disabled class="opacity-30 px-2 py-1"' : 'class="btn-3d btn-neutral px-2.5 py-1 rounded-lg text-xs font-black"'} title="Move Down">
+                <i class="fa-solid fa-arrow-down"></i>
+              </button>
+              <button onclick="openCategoryModal('${cat.id}')" class="btn-3d btn-neutral px-3 py-1 rounded-lg text-xs font-extrabold">
+                Edit
+              </button>
+              <button onclick="confirmDeleteCategory('${cat.id}')" class="btn-3d btn-red px-2.5 py-1 rounded-lg text-xs font-black" title="Delete Category">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const soundBtn = document.getElementById('btnSoundToggle');
+      if (soundBtn) {
+        soundBtn.textContent = appState.settings.soundEnabled ? '🔊 Sounds ON' : '🔇 Sounds OFF';
+        soundBtn.className = appState.settings.soundEnabled
+          ? 'btn-3d btn-green px-4 py-2 rounded-xl text-xs font-black'
+          : 'btn-3d btn-neutral px-4 py-2 rounded-xl text-xs font-extrabold';
+      }
+    }
+
+    function toggleSoundSetting() {
+      appState.settings.soundEnabled = !appState.settings.soundEnabled;
+      saveState();
+      if (appState.settings.soundEnabled) playChime('save');
+      renderSettingsView();
+    }
+
+    // =========================================================
+    // BACKUP (.JSON), RESTORE / MERGE, & GOOGLE SHEETS (.CSV)
+    // =========================================================
+    function getTimestampString() {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function exportFullBackupJSON() {
+      const payload = {
+        app: "Shelly's Vault",
+        schemaVersion: 1,
+        exportedAt: new Date().toISOString(),
+        settings: appState.settings,
+        categories: appState.categories,
+        ideas: appState.ideas
+      };
+
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `shellys-vault-backup-${getTimestampString()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      playChime('save');
+      showToast('JSON Backup downloaded!', '💾');
+    }
+
+    function handleBackupFileSelected(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (!imported || !Array.isArray(imported.categories) || !Array.isArray(imported.ideas)) {
+            showToast('Invalid backup file format!', '⚠️');
+            return;
+          }
+
+          openConfirmDialog({
+            icon: '📦',
+            title: 'Restore Backup File',
+            message: `Found ${imported.ideas.length} idea(s) and ${imported.categories.length} categories in "${file.name}". Would you like to safely MERGE them with your current vault, or REPLACE everything?`,
+            actions: [
+              { label: 'Cancel', classes: 'btn-neutral', onClick: closeConfirmDialog },
+              {
+                label: 'Merge Safely (Recommended)',
+                classes: 'btn-green',
+                onClick: () => {
+                  mergeImportedData(imported);
+                  closeConfirmDialog();
+                }
+              },
+              {
+                label: 'Replace All Existing Data',
+                classes: 'btn-red',
+                onClick: () => {
+                  appState.categories = imported.categories;
+                  appState.ideas = imported.ideas;
+                  if (imported.settings) appState.settings = { ...appState.settings, ...imported.settings };
+                  saveState();
+                  refreshAllUI();
+                  closeConfirmDialog();
+                  playChime('save');
+                  showToast('Vault restored from backup!', '🎉');
+                }
+              }
+            ]
+          });
+        } catch (err) {
+          showToast('Could not parse JSON file!', '⚠️');
+        } finally {
+          event.target.value = '';
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function mergeImportedData(imported) {
+      const existingCatIds = new Set(appState.categories.map(c => c.id));
+      imported.categories.forEach(cat => {
+        if (!existingCatIds.has(cat.id)) {
+          appState.categories.push({ ...cat, order: appState.categories.length });
+        }
+      });
+
+      const existingIdeaIds = new Set(appState.ideas.map(i => i.id));
+      let addedCount = 0;
+      imported.ideas.forEach(idea => {
+        if (!existingIdeaIds.has(idea.id)) {
+          appState.ideas.push(idea);
+          addedCount++;
+        }
+      });
+
+      saveState();
+      refreshAllUI();
+      playChime('save');
+      showToast(`Merged ${addedCount} new idea(s) safely!`, '🐢');
+    }
+
+    function exportToGoogleSheetsCSV() {
+      const headers = [
+        'Category',
+        'Title',
+        'Description',
+        'Status',
+        'Priority',
+        'Favorite',
+        'Notes',
+        'Creation Date',
+        'Links'
+      ];
+
+      const escapeCSV = (val) => {
+        const str = String(val ?? '');
+        if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      };
+
+      const rows = appState.ideas.map(idea => {
+        const cat = appState.categories.find(c => c.id === idea.categoryId);
+        const catName = cat ? cat.name : 'General Ideas';
+        const createdDate = new Date(idea.createdAt).toISOString().slice(0, 10);
+        return [
+          catName,
+          idea.title,
+          idea.description || '',
+          idea.status || 'Idea',
+          idea.priority || 'None',
+          idea.favorite ? 'Yes' : 'No',
+          idea.notes || '',
+          createdDate,
+          idea.link || ''
+        ].map(escapeCSV).join(',');
+      });
+
+      const csvContent = '\uFEFF' + [headers.map(escapeCSV).join(','), ...rows].join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `shellys-vault-sheets-${getTimestampString()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      playChime('save');
+      showToast('CSV exported for Google Sheets!', '📊');
+    }
+
+    // =========================================================
+    // GOOGLE SHEETS CSV IMPORT ENGINE (FILE & PUBLISHED URL)
+    // =========================================================
+    function openSheetsImportModal() {
+      document.getElementById('sheetsUrlOrTextInput').value = '';
+      document.getElementById('sheetsImportModalBackdrop').classList.remove('hidden');
+    }
+
+    function closeSheetsImportModal() {
+      document.getElementById('sheetsImportModalBackdrop').classList.add('hidden');
+    }
+
+    function handleCSVFileUpload(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const text = e.target.result;
+        processImportedCSVText(text, file.name);
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    async function handleSheetsUrlOrTextImport() {
+      const rawInput = document.getElementById('sheetsUrlOrTextInput').value.trim();
+      if (!rawInput) {
+        showToast('Please paste a Google Sheets CSV link or CSV text first!', '⚠️');
+        return;
+      }
+
+      if (rawInput.startsWith('http://') || rawInput.startsWith('https://')) {
+        try {
+          let fetchUrl = rawInput;
+          // Convert standard Google Sheets sharing URL to CSV export URL automatically if needed
+          const match = rawInput.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+          if (match && !rawInput.includes('output=csv') && !rawInput.includes('format=csv')) {
+            fetchUrl = `https://docs.google.com/spreadsheets/d/${match[1]}/export?format=csv`;
+          }
+          showToast('Fetching Google Sheet...', '⏳');
+          const res = await fetch(fetchUrl);
+          if (!res.ok) throw new Error('Network error');
+          const csvText = await res.text();
+          processImportedCSVText(csvText, 'Google Sheets Link');
+        } catch (err) {
+          showToast('Could not fetch link directly. Make sure the sheet is Published to Web as CSV, or download as .CSV file.', '⚠️');
+        }
+      } else {
+        processImportedCSVText(rawInput, 'Pasted CSV Rows');
+      }
+    }
+
+    // RFC-compliant CSV parser handling quotes, commas, and multi-line notes
+    function parseCSVRows(csvText) {
+      const rows = [];
+      let currentRow = [];
+      let currentField = '';
+      let inQuotes = false;
+      const cleanText = csvText.replace(/^\uFEFF/, '');
+
+      for (let i = 0; i < cleanText.length; i++) {
+        const ch = cleanText[i];
+        const nextCh = cleanText[i + 1];
+
+        if (inQuotes) {
+          if (ch === '"' && nextCh === '"') {
+            currentField += '"';
+            i++;
+          } else if (ch === '"') {
+            inQuotes = false;
+          } else {
+            currentField += ch;
+          }
+        } else {
+          if (ch === '"') {
+            inQuotes = true;
+          } else if (ch === ',') {
+            currentRow.push(currentField.trim());
+            currentField = '';
+          } else if (ch === '\n' || (ch === '\r' && nextCh === '\n')) {
+            if (ch === '\r') i++;
+            currentRow.push(currentField.trim());
+            if (currentRow.some(cell => cell !== '')) {
+              rows.push(currentRow);
+            }
+            currentRow = [];
+            currentField = '';
+          } else {
+            currentField += ch;
+          }
+        }
+      }
+
+      if (currentField !== '' || currentRow.length > 0) {
+        currentRow.push(currentField.trim());
+        if (currentRow.some(cell => cell !== '')) {
+          rows.push(currentRow);
+        }
+      }
+      return rows;
+    }
+
+    function processImportedCSVText(csvText, sourceLabel) {
+      const rows = parseCSVRows(csvText);
+      if (rows.length < 2) {
+        showToast('No data rows found in CSV!', '⚠️');
+        return;
+      }
+
+      const headers = rows[0].map(h => h.toLowerCase().trim());
+      const colIdx = {
+        category: headers.findIndex(h => h.includes('cat')),
+        title: headers.findIndex(h => h.includes('title') || h.includes('name') || h.includes('idea')),
+        desc: headers.findIndex(h => h.includes('desc') || h.includes('summary')),
+        status: headers.findIndex(h => h.includes('status') || h.includes('stage')),
+        priority: headers.findIndex(h => h.includes('prio')),
+        favorite: headers.findIndex(h => h.includes('fav') || h.includes('star') || h.includes('pin')),
+        notes: headers.findIndex(h => h.includes('note') || h.includes('detail')),
+        date: headers.findIndex(h => h.includes('date') || h.includes('creat')),
+        link: headers.findIndex(h => h.includes('link') || h.includes('url'))
+      };
+
+      // Fallback if header doesn't explicitly say Title: use column 1 if Category is 0, else column 0
+      if (colIdx.title === -1) {
+        colIdx.title = colIdx.category === 0 ? 1 : 0;
+      }
+
+      const validStatuses = ['Idea', 'Planning', 'In Progress', 'Completed'];
+      const validPriorities = ['None', 'Low', 'Medium', 'High'];
+      const colorKeys = Object.keys(COLOR_PALETTES);
+
+      const parsedIdeas = [];
+      const newCategoriesCreated = [];
+
+      for (let r = 1; r < rows.length; r++) {
+        const row = rows[r];
+        const title = (row[colIdx.title] || '').trim();
+        if (!title) continue;
+
+        const catName = colIdx.category > -1 ? (row[colIdx.category] || 'General Ideas').trim() : 'General Ideas';
+        let catObj = appState.categories.find(c => c.name.toLowerCase() === catName.toLowerCase());
+        if (!catObj) {
+          catObj = {
+            id: 'cat_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
+            name: catName || 'General Ideas',
+            icon: '📁',
+            color: colorKeys[(appState.categories.length + newCategoriesCreated.length) % colorKeys.length],
+            order: appState.categories.length + newCategoriesCreated.length
+          };
+          appState.categories.push(catObj);
+          newCategoriesCreated.push(catObj.name);
+        }
+
+        const rawStatus = colIdx.status > -1 ? (row[colIdx.status] || '').trim() : 'Idea';
+        const matchedStatus = validStatuses.find(s => s.toLowerCase() === rawStatus.toLowerCase()) || 'Idea';
+
+        const rawPrio = colIdx.priority > -1 ? (row[colIdx.priority] || '').trim() : 'None';
+        const matchedPrio = validPriorities.find(p => p.toLowerCase() === rawPrio.toLowerCase()) || 'None';
+
+        const rawFav = colIdx.favorite > -1 ? (row[colIdx.favorite] || '').toLowerCase().trim() : '';
+        const isFav = ['yes', 'true', '1', 'star', '⭐'].includes(rawFav);
+
+        const rawDate = colIdx.date > -1 ? (row[colIdx.date] || '').trim() : '';
+        const parsedDate = rawDate && !isNaN(Date.parse(rawDate)) ? new Date(rawDate).toISOString() : new Date().toISOString();
+
+        parsedIdeas.push({
+          id: 'idea_' + Date.now() + '_' + r + '_' + Math.random().toString(36).slice(2, 5),
+          title,
+          description: colIdx.desc > -1 ? (row[colIdx.desc] || '').trim() : '',
+          categoryId: catObj.id,
+          status: matchedStatus,
+          priority: matchedPrio,
+          favorite: isFav,
+          notes: colIdx.notes > -1 ? (row[colIdx.notes] || '').trim() : '',
+          link: colIdx.link > -1 ? (row[colIdx.link] || '').trim() : '',
+          createdAt: parsedDate,
+          updatedAt: new Date().toISOString()
+        });
+      }
+
+      if (parsedIdeas.length === 0) {
+        showToast('No valid idea rows found to import!', '⚠️');
+        return;
+      }
+
+      closeSheetsImportModal();
+
+      openConfirmDialog({
+        icon: '📊',
+        title: 'Import Google Sheets Data',
+        message: `Parsed ${parsedIdeas.length} idea(s) from "${sourceLabel}". Would you like to MERGE them with your current vault or REPLACE existing ideas?`,
+        actions: [
+          { label: 'Cancel', classes: 'btn-neutral', onClick: closeConfirmDialog },
+          {
+            label: 'Merge with Vault',
+            classes: 'btn-green',
+            onClick: () => {
+              appState.ideas = [...parsedIdeas, ...appState.ideas];
+              saveState();
+              refreshAllUI();
+              closeConfirmDialog();
+              playChime('save');
+              showToast(`Imported ${parsedIdeas.length} idea(s) from Sheets!`, '📊');
+            }
+          },
+          {
+            label: 'Replace All Ideas',
+            classes: 'btn-red',
+            onClick: () => {
+              appState.ideas = parsedIdeas;
+              saveState();
+              refreshAllUI();
+              closeConfirmDialog();
+              playChime('save');
+              showToast(`Replaced vault with ${parsedIdeas.length} idea(s)!`, '📊');
+            }
+          }
+        ]
+      });
+    }
+
+    function confirmResetVault() {
+      openConfirmDialog({
+        icon: '⚠️',
+        title: 'Reset Entire Vault?',
+        message: 'This will remove all current ideas and restore the 5 default empty categories. Consider downloading a JSON Backup first!',
+        actions: [
+          { label: 'Cancel', classes: 'btn-neutral', onClick: closeConfirmDialog },
+          {
+            label: 'Clear All Ideas',
+            classes: 'btn-red',
+            onClick: () => {
+              appState.categories = getDefaultCategories();
+              appState.ideas = [];
+              saveState();
+              closeConfirmDialog();
+              navigateTo('home');
+              showToast('Vault cleared to a blank slate!', '✨');
+            }
+          }
+        ]
+      });
+    }
+
+    // =========================================================
+    // UTILITIES: CONFIRM MODAL, TOAST, HTML ESCAPE
+    // =========================================================
+    function openConfirmDialog({ icon, title, message, actions }) {
+      document.getElementById('confirmModalIcon').textContent = icon || '⚠️';
+      document.getElementById('confirmModalTitle').textContent = title || 'Confirm';
+      document.getElementById('confirmModalMessage').textContent = message || '';
+
+      const actionsContainer = document.getElementById('confirmModalActions');
+      actionsContainer.innerHTML = '';
+      actions.forEach(act => {
+        const btn = document.createElement('button');
+        btn.className = `btn-3d ${act.classes || 'btn-neutral'} px-4 py-2.5 rounded-xl text-xs font-black`;
+        btn.textContent = act.label;
+        btn.onclick = act.onClick;
+        actionsContainer.appendChild(btn);
+      });
+
+      document.getElementById('confirmModalBackdrop').classList.remove('hidden');
+    }
+
+    function closeConfirmDialog() {
+      document.getElementById('confirmModalBackdrop').classList.add('hidden');
+    }
+
+    let toastTimer = null;
+    function showToast(message, emoji = '🐢') {
+      const toast = document.getElementById('toastNotification');
+      document.getElementById('toastEmoji').textContent = emoji;
+      document.getElementById('toastText').textContent = message;
+      toast.classList.remove('hidden');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3200);
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Bootstrap App on Load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      refreshAllUI();
+    });
+  </script>
+</body>
+</html>
